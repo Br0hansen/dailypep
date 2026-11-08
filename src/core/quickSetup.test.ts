@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { latestVial, quickSetup, type QuickSetupInput } from './quickSetup';
+import { blendDraw, blendVialContent, latestVial, quickSetup, type QuickSetupInput } from './quickSetup';
 import { doseContainer } from './dailyActions';
 import { emptyData, validateData } from '../data/validation';
 
@@ -34,5 +34,31 @@ describe('quick setup', () => {
     expect(second.vials.map(v => v.id)).toEqual(['v1', 'v2']);
     expect(second.protocols[1].vialId).toBe('v2');
     expect(latestVial(second, 'BPC-157')?.id).toBe('v2');
+  });
+});
+
+describe('quick setup for blends', () => {
+  const components = [{ name: 'CJC-1295 (uten DAC)', amount: 5, unit: 'mg' as const }, { name: 'Ipamorelin', amount: 5, unit: 'mg' as const }];
+  it('gives units for an amount of one component and what each component gives', () => {
+    // 5 mg in 2 ml = 2.5 mg/ml → 100 mcg = 0.04 ml = 4 units, and the same 100 mcg of Ipamorelin.
+    const draw = blendDraw(components, 2, 0, 100, 'mcg');
+    expect(draw?.units).toBeCloseTo(4);
+    expect(draw?.doses).toBe(50);
+    expect(draw?.perDose.map(c => c.amount)).toEqual([expect.closeTo(0.1), expect.closeTo(0.1)]);
+    expect(blendDraw(components, 2, 1, 6, 'mg')?.tooMuch).toBe(true);
+    expect(blendDraw([{ name: 'A', amount: 10, unit: 'iu' }], 2, 0, 100, 'mcg')).toBeNull();
+  });
+  it('creates the blend peptide, a vial with the summed content and a plan dosed in units', () => {
+    const vial = blendVialContent(components);
+    const data = validateData(quickSetup(emptyData(), { ...input, name: 'CJC-1295 + Ipamorelin', vialAmount: vial.amount, vialUnit: vial.unit, doseAmount: 4, doseUnit: 'units', components }, ids));
+    expect(data.peptides[0].components).toEqual(components);
+    expect(data.vials[0]).toMatchObject({ amount: 10, unit: 'mg', volumeML: 2 });
+    expect(data.protocols[0].phases[0]).toMatchObject({ amount: 4, unit: 'units' });
+    expect(doseContainer(data, data.protocols[0], 4, 'units', '2026-11-08')?.calculation?.units).toBe(4);
+  });
+  it('never overwrites components already recorded on the peptide', () => {
+    const first = quickSetup(emptyData(), { ...input, name: 'Wolverine', doseAmount: 4, doseUnit: 'units', components }, ids);
+    const second = quickSetup(first, { ...input, name: 'Wolverine', doseAmount: 4, doseUnit: 'units', components: [{ name: 'X', amount: 1, unit: 'mg' }] }, { peptide: 'p2', vial: 'v2', protocol: 'pr2', plan: 'plan2' });
+    expect(second.peptides[0].components).toEqual(components);
   });
 });

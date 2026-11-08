@@ -1,10 +1,13 @@
-import type { AppData, DoseUnit, Peptide, Protocol, ScheduleRule, Vial } from './types';
+import type { AppData, BlendComponent, DoseUnit, Peptide, Protocol, ScheduleRule, Vial } from './types';
+import { calculateDose, convertDose } from './math';
 
 export interface QuickSetupInput {
   name: string; color: string;
   vialAmount: number; vialUnit: DoseUnit; waterML: number;
   doseAmount: number; doseUnit: DoseUnit;
   rule: ScheduleRule; minuteOfDay: number; startDay: string;
+  /** Blend: total content per component. The dose is then in units (U-100). */
+  components?: BlendComponent[];
 }
 export interface QuickSetupIds { peptide: string; vial: string; protocol: string; plan: string }
 
@@ -16,6 +19,27 @@ export function latestVial(data: AppData, peptideName: string): Vial | undefined
   return peptide ? data.vials.filter(v => v.peptideId === peptide.id).at(-1) : undefined;
 }
 
+/** A blend vial's total: the sum when all components share a unit, else the first component. */
+export function blendVialContent(components: BlendComponent[]): { amount: number; unit: DoseUnit } {
+  const unit = components[0].unit;
+  return components.every(c => c.unit === unit)
+    ? { amount: components.reduce((sum, c) => sum + c.amount, 0), unit }
+    : { amount: components[0].amount, unit };
+}
+
+/**
+ * Blend draw: the amount is chosen for one component; every component scales with the same volume.
+ * Returns the units to draw, the volume, doses per vial and what each component gives per dose.
+ */
+export function blendDraw(components: BlendComponent[], waterML: number, index: number, amount: number, unit: DoseUnit) {
+  const steer = components[index];
+  const converted = steer ? convertDose(amount, unit, steer.unit) : null;
+  const result = converted === null ? null : calculateDose(steer.amount, waterML, converted);
+  if (!result) return null;
+  const fraction = result.volumeML / waterML;
+  return { ...result, perDose: components.map(c => ({ ...c, amount: c.amount * fraction })), tooMuch: converted! > steer.amount + 1e-9 };
+}
+
 /**
  * One step: peptide (found or created), powder vial (reused when identical, else created
  * as mixed on the start day) and a single-item plan linked to that vial.
@@ -25,8 +49,13 @@ export function quickSetup(data: AppData, input: QuickSetupInput, ids: QuickSetu
   let peptides = data.peptides;
   let peptide: Peptide | undefined = peptides.find(p => normalize(p.name) === normalize(name));
   if (!peptide) {
-    peptide = { id: ids.peptide, name, color: input.color, notes: '' };
+    peptide = { id: ids.peptide, name, color: input.color, notes: '', ...(input.components?.length ? { components: input.components } : {}) };
     peptides = [...peptides, peptide];
+  } else if (input.components?.length && !peptide.components?.length) {
+    // Fill in components once; recorded components are never changed as a side effect.
+    const updated: Peptide = { ...peptide, components: input.components };
+    peptides = peptides.map(p => p.id === updated.id ? updated : p);
+    peptide = updated;
   }
   const peptideId = peptide.id;
   let vials = data.vials;
