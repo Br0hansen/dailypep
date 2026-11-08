@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { X, Plus, FlaskConical } from 'lucide-react';
 import type { AppData, DoseUnit, ScheduleRule } from '../core/types';
 export interface ViewProps { data: AppData; update: (updater: (data: AppData) => AppData) => Promise<void>; language: 'nb' | 'en' }
@@ -27,3 +27,25 @@ export function RuleFields({ value, onChange, language }: { value: ScheduleRule;
   return <><Field label={t('Frekvens','Frequency')}><select value={value.kind} onChange={event=>onChange(event.target.value==='interval'?{kind:'interval',days:1}:event.target.value==='weekdays'?{kind:'weekdays',days:[]}:{kind:'cycle',daysOn:1,daysOff:1})}><option value="interval">{t('Hver N. dag','Every N days')}</option><option value="weekdays">{t('Faste ukedager','Days of the week')}</option><option value="cycle">{t('Dager på / av','Days on / off')}</option></select></Field>{value.kind==='interval'&&<Field label={t('Antall dager mellom doser','Days between doses')}><input required type="number" min="1" max="3650" step="1" value={value.days||''} onChange={event=>onChange({...value,days:Number(event.target.value)})}/></Field>}{value.kind==='cycle'&&<div className="form-grid"><Field label={t('Dager på','Days on')}><input required type="number" min="1" max="3650" step="1" value={value.daysOn||''} onChange={event=>onChange({...value,daysOn:Number(event.target.value)})}/></Field><Field label={t('Dager av','Days off')}><input required type="number" min="0" max="3650" step="1" value={value.daysOff} onChange={event=>onChange({...value,daysOff:Number(event.target.value)})}/></Field></div>}{value.kind==='weekdays'&&<fieldset className="weekday-picker"><legend>{t('Velg dager','Choose days')}</legend>{[1,2,3,4,5,6,0].map(day=><label key={day}><input type="checkbox" checked={value.days.includes(day)} onChange={event=>onChange({...value,days:event.target.checked?[...value.days,day]:value.days.filter(d=>d!==day)})}/><span>{(language==='nb'?['Sø','Ma','Ti','On','To','Fr','Lø']:['Su','Mo','Tu','We','Th','Fr','Sa'])[day]}</span></label>)}</fieldset>}</>;
 }
 export function positive(value: string): number | null { const n = Number(value.replace(',','.')); return value.trim() && Number.isFinite(n) && n>0 ? n : null; }
+
+/**
+ * Text field with its own dropdown of matches (prefix matches first). Replaces <datalist>,
+ * which iOS shows in the bar above the keyboard instead of under the field.
+ */
+export function SuggestInput({ value, onChange, options, placeholder, required, autoFocus, readOnly, maxLength = 120 }: { value: string; onChange: (value: string) => void; options: string[]; placeholder?: string; required?: boolean; autoFocus?: boolean; readOnly?: boolean; maxLength?: number }) {
+  const [open, setOpen] = useState(false);
+  const term = value.trim().toLocaleLowerCase();
+  const matches = open && term && !readOnly ? [...new Set(options)].filter(o => o.toLocaleLowerCase().includes(term) && o.toLocaleLowerCase() !== term)
+    .sort((a, b) => Number(!a.toLocaleLowerCase().startsWith(term)) - Number(!b.toLocaleLowerCase().startsWith(term))).slice(0, 8) : [];
+  const pick = (option: string) => { onChange(option); setOpen(false); };
+  return <div className="suggest">
+    <input value={value} required={required} autoFocus={autoFocus} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder}
+      autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} role="combobox" aria-expanded={matches.length > 0} aria-autocomplete="list"
+      onChange={event => { onChange(event.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)}
+      onKeyDown={event => { if (event.key === 'Escape') setOpen(false); }}/>
+    {matches.length > 0 && <ul className="suggest-list" role="listbox">{matches.map(option => <li key={option} role="option" aria-selected={false}>
+      {/* Keep focus on the field while tapping; the delayed blur above covers browsers that blur anyway. */}
+      <button type="button" tabIndex={-1} onPointerDown={event => event.preventDefault()} onMouseDown={event => event.preventDefault()} onClick={() => pick(option)}>{option}</button>
+    </li>)}</ul>}
+  </div>;
+}

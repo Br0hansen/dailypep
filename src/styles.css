@@ -41,3 +41,14 @@ html,body{background:var(--bg)}
 .quick-setup .wizard-actions .text-button{display:inline-flex;align-items:center;gap:6px;text-align:left;font-size:12px}
 @media(max-width:760px){.quick-setup .form-grid{grid-template-columns:1fr 1fr;gap:10px}.quick-setup .wizard-actions{flex-wrap:wrap}.quick-setup .wizard-actions .button.primary{flex:1 0 100%;order:-1;min-height:46px}}
 .blend-quick{padding:14px;border:1px solid #34434f;border-radius:12px;background:#101b24;gap:12px}.blend-quick .field-label{font-size:12px;color:var(--muted)}.draw-result .draw-components{color:#c9d6dd;font-size:12px;line-height:1.45}
+/* Own suggestion dropdown (replaces datalist, which iOS shows above the keyboard) */
+.suggest{position:relative;width:100%}.suggest>input{width:100%}
+.suggest-list{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:30;list-style:none;margin:0;padding:5px;max-height:272px;overflow-y:auto;overscroll-behavior:contain;background:#18252f;border:1px solid #3c4f5b;border-radius:12px;box-shadow:0 18px 50px #000a}
+.suggest-list button{display:block;width:100%;text-align:left;justify-content:flex-start;border:0;background:transparent;color:#e3ecef;font-size:15px;padding:12px 12px;border-radius:8px;min-height:44px}
+.suggest-list button:hover,.suggest-list button:active{background:#71e4bf18;color:var(--accent)}
+/* Sheets and pages only scroll vertically */
+html,body{overflow-x:clip}
+.modal{overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y}
+.modal-content,.modal form,.modal .field,.modal .form-grid>*{min-width:0;max-width:100%}
+.modal input,.modal select,.modal textarea{min-width:0;max-width:100%}
+.modal input[type=date],.modal input[type=time]{-webkit-appearance:none;appearance:none;width:100%;display:block}

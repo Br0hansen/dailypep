@@ -6,7 +6,7 @@ import { calculateDose, convertDose } from '../core/math';
 import { blendDraw, blendVialContent, latestVial, quickSetup } from '../core/quickSetup';
 import { blendDrafts, buildBlendComponents, type ComponentDraft } from './planBlend';
 import { todayDay } from '../core/schedule';
-import { Field, Modal, RuleFields, colors, numberText, positive, uid, unitLabel, type ViewProps } from './shared';
+import { Field, Modal, RuleFields, SuggestInput, colors, numberText, positive, uid, unitLabel, type ViewProps } from './shared';
 
 type Frequency = 'daily' | 'other' | 'weekly' | 'custom';
 const normalize = (value: string) => value.trim().toLocaleLowerCase();
@@ -99,8 +99,7 @@ export function QuickSetup({ data, update, language, onClose, onSaved, onFullWiz
 
   return <Modal title={t('Legg til plan', 'Add plan')} onClose={() => !busy && onClose()}>
     <form className="stack quick-setup" onSubmit={submit}>
-      <Field label={t('Peptid', 'Peptide')}><input required autoFocus list="quick-peptides" maxLength={120} value={name} onChange={e => chooseName(e.target.value)} placeholder={t('Søk eller skriv navn', 'Search or type a name')}/></Field>
-      <datalist id="quick-peptides">{[...new Set([...data.peptides.map(p => p.name), ...searchCatalog('').map(p => p.name)])].map(value => <option key={value} value={value}/>)}</datalist>
+      <Field label={t('Peptid', 'Peptide')}><SuggestInput required autoFocus value={name} onChange={chooseName} options={[...data.peptides.map(p => p.name), ...searchCatalog('').map(p => p.name)]} placeholder={t('Søk eller skriv navn', 'Search or type a name')}/></Field>
       {isBlend ? <><div className="blend-quick stack"><span className="field-label">{t('Innhold i glasset, fra etiketten', 'Vial content, from the label')}</span>{components.map((c, index) => <Field key={c.name} label={c.name}><div className="input-with-unit"><input required readOnly={c.locked} inputMode="decimal" type="number" min="0.000001" step="any" value={c.amount} onChange={e => patchComponent(index, { amount: e.target.value })} placeholder="5"/><select aria-label={`${t('Enhet for', 'Unit for')} ${c.name}`} disabled={c.locked} value={c.unit} onChange={e => patchComponent(index, { unit: e.target.value as ComponentDraft['unit'] })}>{(['mg', 'mcg', 'iu'] as const).map(u => <option key={u} value={u}>{unitLabel(u, language)}</option>)}</select></div></Field>)}{components.some(c => c.locked) && <small className="muted">{t('Hentet fra peptidet ditt. Endres under Beholdning.', 'From your peptide. Change it in Inventory.')}</small>}</div>
         <Field label={t('BAC-vann (ml)', 'BAC water (ml)')}><input required inputMode="decimal" type="number" min="0.000001" step="any" value={water} onChange={e => setWater(e.target.value)} placeholder="2"/></Field></>
       : <div className="form-grid">
