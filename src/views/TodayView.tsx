@@ -8,13 +8,13 @@ import { Avatar, EmptyState, Field, Modal, dateText, numberText, uid, unitLabel,
 
 type DoseRow = {protocol:Protocol;dose:PlannedDose};
 const timeText=(minute:number)=>`${String(Math.floor(minute/60)).padStart(2,'0')}:${String(minute%60).padStart(2,'0')}`;
-/** Pen clicks first when the container has a click count; otherwise volume and U-100 units. */
+/** Pen clicks first when the container has a click count; otherwise U-100 units to draw, then volume. */
 const drawHint=(info:{calculation:{volumeML:number;units:number};clicks:number|null},language:'nb'|'en')=>{
   const t=(nb:string,en:string)=>language==='nb'?nb:en;
   const ml=`${numberText(info.calculation.volumeML,language)} ml`;
   return info.clicks!==null
     ? `${numberText(Math.round(info.clicks*10)/10,language)} ${t('klikk','clicks')} · ${ml}`
-    : `${ml} · ${numberText(info.calculation.units,language)} ${t('E på U-100','units on U-100')}`;
+    : `${t('Trekk opp','Draw')} ${numberText(Math.round(info.calculation.units*100)/100,language)} ${t('E','units')} · ${ml}`;
 };
 
 export function TodayView({ data, update, language, onAddPlan }: ViewProps & {onAddPlan:()=>void}) {
@@ -65,7 +65,7 @@ export function TodayView({ data, update, language, onAddPlan }: ViewProps & {on
     </article>;
   }
   const previews=preview?data.protocols.flatMap(protocol=>{const dose=plannedDose(protocol,preview);return dose?[{protocol,dose}]:[];}).sort((a,b)=>a.protocol.reminderMinuteOfDay-b.protocol.reminderMinuteOfDay):[];
-  if(!data.protocols.length)return <section className="first-plan-state"><div className="first-plan-icon"><CalendarDays size={30}/></div><span className="eyebrow">{t('START HER','START HERE')}</span><h2>{t('Alt begynner med din første plan','Start with your first plan')}</h2><p className="muted">{t('Legg inn dine egne mengder og dager. Så samler vi dagens registreringer her.','Enter your own amounts and days. Your daily entries will appear here.')}</p><button className="button primary" onClick={onAddPlan}><Plus size={18}/>{t('Opprett din første plan','Create your first plan')}</button><div className="setup-preview"><span>1 · {t('Navn','Name')}</span><span>2 · {t('Mengde','Amount')}</span><span>3 · {t('Dager','Days')}</span><span>4 · {t('Se gjennom','Review')}</span></div></section>;
+  if(!data.protocols.length)return <section className="first-plan-state"><div className="first-plan-icon"><CalendarDays size={30}/></div><span className="eyebrow">{t('START HER','START HERE')}</span><h2>{t('Alt begynner med din første plan','Start with your first plan')}</h2><p className="muted">{t('Legg inn glasset, vannet og mengden din. Så ser du hvor mange enheter du skal trekke opp.','Enter your vial, water and amount. You’ll see how many units to draw.')}</p><button className="button primary" onClick={onAddPlan}><Plus size={18}/>{t('Opprett din første plan','Create your first plan')}</button><div className="setup-preview"><span>1 · {t('Peptid','Peptide')}</span><span>2 · {t('Glass og vann','Vial & water')}</span><span>3 · {t('Mengde','Amount')}</span><span>4 · {t('Start','Start')}</span></div></section>;
   return <div className="stack today-workspace">
     <section className="card daily-agenda"><div className="section-heading"><div><h2>{t('Dagens registreringer','Today’s entries')}</h2><p className="muted">{dateText(today,language)}</p></div><span className="daily-count">{registered.length} / {doses.length} {t('registrert','logged')}</span></div>
       {error&&<p role="alert" className="error">{error}</p>}{notice&&<p role="status" className="daily-notice">{notice}</p>}
