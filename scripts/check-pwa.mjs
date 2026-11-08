@@ -1,0 +1,21 @@
+import fs from 'node:fs';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+const dist = fileURLToPath(new URL('../dist/', import.meta.url));
+import assert from 'node:assert/strict';
+const source=fs.readFileSync(dist + 'sw.js','utf8');
+const handlers={};let waiting=0;let claimed=0;const stores=new Map();let deleted=[];let networkFail=false;
+const scope='https://example.test/dailypep/';
+const cacheApi={async open(key){if(!stores.has(key))stores.set(key,new Map());const map=stores.get(key);return {async addAll(urls){for(const url of urls){const file=url.slice(scope.length);assert(fs.existsSync(dist+file),file);map.set(url,{url,cached:true});}},async match(request){return map.get(typeof request==='string'?request:request.url);}};},async keys(){return [...stores.keys()];},async delete(key){deleted.push(key);return stores.delete(key);}};
+const self={registration:{scope},location:{origin:'https://example.test'},clients:{claim:async()=>claimed++},skipWaiting:()=>waiting++,addEventListener:(name,handler)=>handlers[name]=handler};
+vm.runInNewContext(source,{self,URL,caches:cacheApi,fetch:async request=>{if(networkFail)throw Error('offline');return {request,network:true}},Response});
+let promise;handlers.install({waitUntil:p=>promise=p});await promise;assert.equal(waiting,0);assert.equal(stores.size,1);
+const activeKey=[...stores.keys()][0];stores.set('other-app',new Map());stores.set(activeKey.replace(/[^-]+$/,'old'),new Map());handlers.activate({waitUntil:p=>promise=p});await promise;assert.equal(claimed,1);assert.equal(stores.has('other-app'),true);assert.equal(deleted.length,1);
+function dispatch(url,mode='cors',method='GET'){let response;handlers.fetch({request:{url,mode,method},respondWith:p=>response=p});return response;}
+assert.equal(dispatch('https://tgqcyfviukurtovtxphy.supabase.co/rest/v1/dailypep_backups'),undefined);
+assert.equal(dispatch(scope+'auth/callback?access_token=private','navigate'),undefined);
+assert.equal(dispatch(scope+'api/private'),undefined);
+assert.equal(dispatch(scope+'index.html','cors','POST'),undefined);
+networkFail=true;const offline=await dispatch(scope,'navigate');assert.equal(offline.cached,true);assert.equal(offline.url,scope+'index.html');
+handlers.message({data:{type:'OTHER'}});assert.equal(waiting,0);handlers.message({data:{type:'SKIP_WAITING'}});assert.equal(waiting,1);
+console.log('PWA worker smoke checks passed: precache files, cache isolation, offline navigation, API exclusion, explicit updates.');

@@ -1,0 +1,48 @@
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowRight, CalendarDays, Edit3, Layers3, Pause, Play, Plus, Trash2 } from 'lucide-react';
+import type { Protocol, SavedCycle } from '../core/types';
+import { groupPlans } from '../core/plans';
+import { addDays, plannedDoses, todayDay } from '../core/schedule';
+import { Avatar, EmptyState, Modal, dateText, numberText, ruleText, unitLabel, type ViewProps } from './shared';
+import { PlanWizard } from './PlanWizard';
+
+interface PlansViewProps extends ViewProps { openNew?:number; onNewConsumed?:()=>void; onOpenInventory?:()=>void }
+export function PlansView({data,update,language,openNew=0,onNewConsumed,onOpenInventory}:PlansViewProps) {
+  const t=(nb:string,en:string)=>language==='nb'?nb:en;
+  const [wizard,setWizard]=useState<{protocols?:Protocol[];template?:SavedCycle;templateOnly?:boolean}|null>(null);
+  const [filter,setFilter]=useState<'plans'|'templates'>('plans');
+  const [notice,setNotice]=useState('');
+  const [error,setError]=useState('');
+  const [busy,setBusy]=useState<string|null>(null);
+  const [needsOpen,setNeedsOpen]=useState(false);
+  useEffect(()=>{if(openNew>0){setWizard({});onNewConsumed?.();}},[openNew,onNewConsumed]);
+  const groups=useMemo(()=>groupPlans(data.protocols),[data.protocols]);
+  const activeGroups=groups.filter(group=>group.protocols.some(protocol=>protocol.isActive));
+  const pausedGroups=groups.filter(group=>group.protocols.every(protocol=>!protocol.isActive));
+  const needs=useMemo(()=>{
+    const totals=new Map<string,{name:string;unit:Protocol['phases'][number]['unit'];amount:number;count:number}>();
+    const start=todayDay();
+    for(const protocol of data.protocols){for(const dose of plannedDoses(protocol,start,addDays(start,29))){const name=data.peptides.find(p=>p.id===protocol.peptideId)?.name??protocol.name;const key=`${name}|${dose.unit}`;const total=totals.get(key)??{name,unit:dose.unit,amount:0,count:0};total.amount+=dose.amount;total.count++;totals.set(key,total);}}
+    return [...totals.values()];
+  },[data.protocols,data.peptides]);
+  async function toggle(protocols:Protocol[],active:boolean){
+    const ids=new Set(protocols.map(protocol=>protocol.id));setBusy(protocols[0].id);setError('');
+    try{await update(current=>({...current,protocols:current.protocols.map(protocol=>ids.has(protocol.id)?{...protocol,isActive:active}:protocol)}));setNotice(active?t('Planen er aktiv igjen. Datoene er beholdt.','Plan resumed. Its dates are unchanged.'):t('Planen er satt på pause. Loggene beholdes.','Plan paused. Your logs are kept.'));}
+    catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(null);}
+  }
+  async function removeTemplate(template:SavedCycle){
+    if(!window.confirm(t(`Slette malen «${template.name}»? Planer du har startet beholdes.`,`Delete template “${template.name}”? Plans already started are kept.`)))return;
+    setBusy(template.id);setError('');try{await update(current=>({...current,cycles:current.cycles.filter(cycle=>cycle.id!==template.id)}));}catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(null);}
+  }
+  function planCard(group:ReturnType<typeof groupPlans>[number]){
+    const active=group.protocols.some(protocol=>protocol.isActive);
+    const ended=group.protocols.every(protocol=>protocol.endDay!==null&&protocol.endDay<todayDay());
+    return <article className="card plan-card" key={group.id}><div className="section-heading"><div><h3>{group.name}</h3><p className="muted">{group.protocols.length} {t('deler i planen','plan items')}</p></div><span className={`badge ${active&&!ended?'success':''}`}>{ended?t('Avsluttet','Ended'):active?t('Aktiv','Active'):t('På pause','Paused')}</span></div><div className="plan-item-list">{group.protocols.map(protocol=>{const peptide=data.peptides.find(p=>p.id===protocol.peptideId);const first=protocol.phases[0];return <div className="plan-item-line" key={protocol.id}><Avatar name={peptide?.name??protocol.name} color={peptide?.color??'#59e0ba'}/><div className="grow"><strong>{peptide?.name??protocol.name}</strong><p className="muted">{ruleText(protocol.rule,language)} · {String(Math.floor(protocol.reminderMinuteOfDay/60)).padStart(2,'0')}:{String(protocol.reminderMinuteOfDay%60).padStart(2,'0')}{!protocol.isActive?` · ${t('på pause','paused')}`:''}</p></div>{first&&<span className="plan-item-amount">{numberText(first.amount,language)} {unitLabel(first.unit,language)}{protocol.phases.length>1&&<small>{protocol.phases.length} {t('faser','phases')}</small>}</span>}</div>;})}</div><div className="plan-card-footer"><small className="muted">{dateText(group.protocols.reduce((day,p)=>p.startDay<day?p.startDay:day,group.protocols[0].startDay),language)}{group.protocols.every(p=>p.endDay)?` – ${dateText(group.protocols.reduce((day,p)=>p.endDay!>day?p.endDay!:day,group.protocols[0].endDay!),language)}`:` · ${t('uten fast sluttdato','no fixed end date')}`}</small><div className="button-row"><button className="button secondary" disabled={busy!==null} onClick={()=>setWizard({protocols:group.protocols})}><Edit3 size={15}/>{t('Rediger','Edit')}</button><button className="icon-button" disabled={busy!==null} aria-label={active?t('Sett plan på pause','Pause plan'):t('Aktiver plan','Resume plan')} onClick={()=>void toggle(group.protocols,!active)}>{active?<Pause size={16}/>:<Play size={16}/>}</button></div></div></article>;
+  }
+  return <div className="page-section plans-view"><div className="section-heading"><div className="plans-switch" role="group" aria-label={t('Vis planer eller maler','Show plans or templates')}><button className={filter==='plans'?'active':''} aria-pressed={filter==='plans'} onClick={()=>setFilter('plans')}>{t('Mine planer','My plans')} <span>{groups.length}</span></button><button className={filter==='templates'?'active':''} aria-pressed={filter==='templates'} onClick={()=>setFilter('templates')}>{t('Maler','Templates')} <span>{data.cycles.length}</span></button></div></div>
+    {notice&&<p className="success-banner" role="status">{notice}</p>}{error&&<p className="error" role="alert">{error}</p>}
+    {filter==='plans'?(groups.length?<><div className="plan-list">{activeGroups.map(planCard)}</div>{pausedGroups.length>0&&<section className="page-section"><h3>{t('Planer på pause','Paused plans')}</h3><div className="plan-list">{pausedGroups.map(planCard)}</div></section>}<button className="plan-needs-link" onClick={()=>setNeedsOpen(true)}><CalendarDays size={18}/><span>{t('Se planlagte mengder neste 30 dager','See planned amounts for the next 30 days')}</span><ArrowRight size={16}/></button></>:<EmptyState icon={<CalendarDays size={28}/>} title={t('Din første plan starter her','Your first plan starts here')} description={t('Legg inn navn, dine egne mengder og dager. En plan kan inneholde ett eller flere peptider.','Enter names, your own amounts and days. A plan can include one or more peptides.')} action={<button className="button primary" onClick={()=>setWizard({})}><Plus size={16}/>{t('Opprett din første plan','Create your first plan')}</button>}/>):<>{data.cycles.length?<div className="plan-list">{data.cycles.map(template=><article className="card template-card" key={template.id}><div className="section-heading"><div className="row-main"><Layers3 size={20}/><h3>{template.name}</h3></div><span className="badge">{t('Mal','Template')}</span></div><p className="muted">{template.items.map(item=>item.peptideName).join(' · ')}</p><p className="muted">{t('Åpnes i samme veiviser, slik at du kan kontrollere mengder og datoer før start.','Opens in the same wizard so you can review amounts and dates before starting.')}</p><div className="button-row"><button className="button primary" onClick={()=>setWizard({template})}><Plus size={15}/>{t('Bruk mal','Use template')}</button><button className="icon-button" aria-label={t('Rediger mal','Edit template')} onClick={()=>setWizard({template,templateOnly:true})}><Edit3 size={16}/></button><button className="icon-button" disabled={busy!==null} aria-label={t('Slett mal','Delete template')} onClick={()=>void removeTemplate(template)}><Trash2 size={16}/></button></div></article>)}</div>:<EmptyState icon={<Layers3 size={28}/>} title={t('Gjenbruk det du har satt opp','Reuse your own setup')} description={t('Velg «Lagre også som mal» når du oppretter en plan. Du kan også lagre kun malen uten å starte noe.','Choose “Also save as a template” when creating a plan. You can also save only the template without starting anything.')} action={<button className="button secondary" onClick={()=>setWizard({})}>{t('Legg til plan','Add plan')}</button>}/>}</>}
+    {wizard&&<PlanWizard {...{data,update,language}} {...wizard} onClose={()=>setWizard(null)} onSaved={setNotice}/>}
+    {needsOpen&&<Modal title={t('Planlagte mengder neste 30 dager','Planned amounts over the next 30 days')} onClose={()=>setNeedsOpen(false)}><div className="stack">{needs.length?needs.map((need,index)=><div className="list-row" key={index}><div><strong>{need.name}</strong><p>{need.count} {t('registreringer','entries')}</p></div><strong>{numberText(need.amount,language)} {unitLabel(need.unit,language)}</strong></div>):<p className="muted">{t('Ingen planlagte registreringer i perioden.','No entries scheduled in this period.')}</p>}<small className="muted">{t('Beregnet fra planene dine. Lagerbeholdning er ikke trukket fra.','Calculated from your plans. Inventory has not been deducted.')}</small>{onOpenInventory&&<button className="button secondary" onClick={()=>{setNeedsOpen(false);onOpenInventory();}}>{t('Åpne beholdning','Open inventory')}<ArrowRight size={15}/></button>}</div></Modal>}
+  </div>;
+}
