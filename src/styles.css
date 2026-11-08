@@ -31,3 +31,5 @@
 /* iPhone: keep the top bar clear of the status bar / Dynamic Island and always reachable, fill the dynamic viewport, and stop Safari's zoom-on-focus (inputs under 16px). */
 html,body{background:var(--bg)}
 @media(max-width:760px){.app-shell{min-height:100dvh}.electric-refined .topbar,.topbar{position:sticky;top:0;z-index:25;height:calc(58px + env(safe-area-inset-top));padding-top:env(safe-area-inset-top);padding-left:max(19px,env(safe-area-inset-left));padding-right:max(19px,env(safe-area-inset-right));background:#0c141bf2;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}input,select,textarea{font-size:16px}}
+/* iPhone follow-up: beat `.electric-refined input{font-size:14px}` (same specificity, later wins) so Safari does not zoom on focus; keep wizard Back/Next visible at the bottom of the dialog. */
+@media(max-width:760px){:root input,:root select,:root textarea{font-size:16px}.modal .wizard-actions{position:sticky;bottom:0;z-index:2;background:#131e27;padding-bottom:16px}}
