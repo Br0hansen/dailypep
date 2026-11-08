@@ -30,4 +30,13 @@ describe('daily action schedule and logging',()=>{
     expect(info?.insufficient).toBe(true);
     expect(doseContainer(data,{...protocol,vialId:'v'},25,'units','2026-10-23')?.calculation?.volumeML).toBe(.25);
   });
+  it('turns the dose into pen clicks from the clicks recorded for a full container',()=>{
+    // 5 mg in 3 ml, 60 clicks in a full pen: 0.25 mg = 0.15 ml = 3 clicks.
+    const pen={id:'v',peptideId:'a',kind:'pen' as const,amount:5,unit:'mg' as const,volumeML:3,preparedAt:null,expiresAt:null,totalClicks:60};
+    const data={...emptyData(),vials:[pen]};
+    expect(doseContainer(data,{...protocol,vialId:'v'},250,'mcg','2026-10-23')?.clicks).toBeCloseTo(3);
+    expect(doseContainer(data,{...protocol,vialId:'v'},15,'units','2026-10-23')?.clicks).toBeCloseTo(3);
+    const withoutClicks={...emptyData(),vials:[{...pen,totalClicks:undefined}]};
+    expect(doseContainer(withoutClicks,{...protocol,vialId:'v'},250,'mcg','2026-10-23')?.clicks).toBeNull();
+  });
 });

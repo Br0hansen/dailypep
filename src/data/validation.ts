@@ -49,7 +49,7 @@ export function validateData(input: unknown): AppData {
       && optional(p.planId, identifier) && optional(p.planName, v => str(v, 300) && !!v.trim()) && optional(p.vialId, identifier)
       && rule(p.rule) && phases(p.phases) && integer(p.reminderMinuteOfDay) && p.reminderMinuteOfDay < 1440 && typeof p.isActive === 'boolean')
     && collection(input.vials, p => str(p.peptideId, 100) && choice(p.kind, ['powder', 'pen']) && positive(p.amount) && unit(p.unit)
-      && positive(p.volumeML) && nullable(p.preparedAt, day) && nullable(p.expiresAt, day))
+      && positive(p.volumeML) && nullable(p.preparedAt, day) && nullable(p.expiresAt, day) && optional(p.totalClicks, positive))
     && collection(input.logs, p => str(p.protocolId, 100) && day(p.day) && positive(p.amount) && unit(p.unit)
       && choice(p.status, ['taken', 'skipped']) && timestamp(p.timestamp) && str(p.note) && optional(p.vialId, v => str(v, 100)))
     && collection(input.measurements, p => day(p.day) && str(p.name, 300) && !!p.name.trim()

@@ -40,8 +40,9 @@ export function doseContainer(data: AppData, protocol: Protocol, amount: number,
     ? { units: amount, volumeML: amount / 100 }
     : converted === null ? null : calculateDose(vial.amount, vial.volumeML, converted);
   const consumed = converted ?? (unit === 'units' ? amount / 100 / vial.volumeML * vial.amount : null);
+  const clicks = calculation && vial.totalClicks ? calculation.volumeML / vial.volumeML * vial.totalClicks : null;
   return {
-    vial, remaining, calculation,
+    vial, remaining, calculation, clicks,
     expired: Boolean(vial.expiresAt && vial.expiresAt < day),
     futurePrepared: Boolean(vial.preparedAt && vial.preparedAt > day),
     insufficient: remaining !== null && consumed !== null && remaining + 1e-9 < consumed,

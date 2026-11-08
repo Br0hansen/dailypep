@@ -17,6 +17,8 @@ export interface Peptide { id: string; name: string; color: string; notes: strin
 export interface Vial {
   id: string; peptideId: string; kind: 'powder' | 'pen'; amount: number; unit: DoseUnit;
   volumeML: number; preparedAt: Day | null; expiresAt: Day | null;
+  /** Optional: clicks a full pen/cartridge gives. Enables a click count per dose. */
+  totalClicks?: number;
 }
 export interface InjectionLog {
   id: string; protocolId: string; day: Day; amount: number; unit: DoseUnit;
