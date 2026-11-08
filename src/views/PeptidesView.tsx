@@ -34,7 +34,9 @@ export function PeptidesView({ data, update, language, onAddPlan }: InventoryPro
     if (!confirm(t(`Slette ${item.name} og beholderne?`, `Delete ${item.name} and its containers?`))) return;
     const saved = await change(() => update(current => {
       if (current.protocols.some(p => p.peptideId === item.id)) throw new Error(t('Peptidet brukes nå av en plan.', 'The peptide is now used by a plan.'));
-      return { ...current, peptides: current.peptides.filter(p => p.id !== item.id), vials: current.vials.filter(v => v.peptideId !== item.id) };
+      const removedVials = new Set(current.vials.filter(v => v.peptideId === item.id).map(v => v.id));
+      // Logs kept from deleted plans may still point at these containers; drop the link like deleteVial does.
+      return { ...current, peptides: current.peptides.filter(p => p.id !== item.id), vials: current.vials.filter(v => !removedVials.has(v.id)), logs: current.logs.map(log => log.vialId && removedVials.has(log.vialId) ? { ...log, vialId: undefined } : log) };
     }));
     if (saved) setSelected(null);
   }

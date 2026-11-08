@@ -29,6 +29,12 @@ describe('validated backup format', () => {
     expect(() => validateData({ ...emptyData(), measurements: [{ ...measurement, day: '2026-02-31' }] })).toThrow();
     expect(() => validateData({ ...emptyData(), vials: [{ id: 'v', peptideId: 'missing', kind: 'pen', amount: 3, unit: 'mg', volumeML: 3, preparedAt: null, expiresAt: null }] })).toThrow('missing records');
   });
+  it('accepts logs from a deleted plan only when they carry the peptide name', () => {
+    const log = { id: 'l', protocolId: 'deleted', day: '2026-11-08', amount: 1, unit: 'mg', status: 'taken', timestamp: '2026-11-08T08:00:00Z', note: '' };
+    expect(() => validateData({ ...emptyData(), logs: [log] })).toThrow('missing records');
+    expect(() => validateData({ ...emptyData(), logs: [{ ...log, peptideName: 'DSIP' }] })).not.toThrow();
+    expect(() => validateData({ ...emptyData(), logs: [{ ...log, peptideName: '  ' }] })).toThrow();
+  });
   it('returns an independent copy rather than mutable input', () => {
     const original = emptyData();
     const copy = validateData(original);

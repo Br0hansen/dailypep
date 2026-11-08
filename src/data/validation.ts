@@ -51,7 +51,8 @@ export function validateData(input: unknown): AppData {
     && collection(input.vials, p => str(p.peptideId, 100) && choice(p.kind, ['powder', 'pen']) && positive(p.amount) && unit(p.unit)
       && positive(p.volumeML) && nullable(p.preparedAt, day) && nullable(p.expiresAt, day) && optional(p.totalClicks, positive))
     && collection(input.logs, p => str(p.protocolId, 100) && day(p.day) && positive(p.amount) && unit(p.unit)
-      && choice(p.status, ['taken', 'skipped']) && timestamp(p.timestamp) && str(p.note) && optional(p.vialId, v => str(v, 100)))
+      && choice(p.status, ['taken', 'skipped']) && timestamp(p.timestamp) && str(p.note) && optional(p.vialId, v => str(v, 100))
+      && optional(p.peptideName, v => str(v, 300) && !!v.trim()))
     && collection(input.measurements, p => day(p.day) && str(p.name, 300) && !!p.name.trim()
       && nullable(p.value, v => typeof v === 'number' && Number.isFinite(v)) && str(p.unit, 100) && str(p.note)
       && choice(p.category, ['body', 'lab', 'other']) && optional(p.photo, v => str(v, 8_000_000) && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v)))
@@ -71,11 +72,11 @@ export function validateData(input: unknown): AppData {
   const vialsById = new Map(data.vials.map(v => [v.id, v]));
   if (data.protocols.some(p => !peptideIds.has(p.peptideId)) || data.vials.some(v => !peptideIds.has(v.peptideId))
     || data.protocols.some(p => p.vialId !== undefined && !vialIds.has(p.vialId))
-    || data.logs.some(l => !protocolIds.has(l.protocolId) || (l.vialId !== undefined && !vialIds.has(l.vialId)))) {
+    || data.logs.some(l => (!protocolIds.has(l.protocolId) && !l.peptideName) || (l.vialId !== undefined && !vialIds.has(l.vialId)))) {
     throw new Error('The DailyPep backup contains references to missing records.');
   }
   if (data.protocols.some(p => p.vialId !== undefined && vialsById.get(p.vialId)?.peptideId !== p.peptideId)
-    || data.logs.some(l => l.vialId !== undefined && vialsById.get(l.vialId)?.peptideId !== protocolsById.get(l.protocolId)?.peptideId)) {
+    || data.logs.some(l => l.vialId !== undefined && protocolsById.has(l.protocolId) && vialsById.get(l.vialId)?.peptideId !== protocolsById.get(l.protocolId)?.peptideId)) {
     throw new Error('A linked container belongs to a different peptide.');
   }
   if (new Set(data.logs.map(l => `${l.protocolId}:${l.day}`)).size !== data.logs.length) {

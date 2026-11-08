@@ -23,6 +23,8 @@ export interface Vial {
 export interface InjectionLog {
   id: string; protocolId: string; day: Day; amount: number; unit: DoseUnit;
   status: 'taken' | 'skipped'; timestamp: string; note: string; vialId?: string;
+  /** Set when the log's plan is deleted, so the Journal keeps the name. Required for logs without a plan. */
+  peptideName?: string;
 }
 export interface Measurement {
   id: string; day: Day; name: string; value: number | null; unit: string; note: string;

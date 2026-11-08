@@ -150,7 +150,7 @@ export function HistoryView({ data, update, language }: ViewProps) {
         const protocol = item.protocol; const peptide = data.peptides.find(p => p.id === protocol?.peptideId); const taken = item.log?.status === 'taken'; const skipped = item.log?.status === 'skipped';
         return <button type="button" className="list-row history-row" key={item.key} disabled={!protocol} onClick={() => protocol && setLogDraft({ protocol, day: item.day, amount: item.amount, unit: item.unit, existing: item.log })}>
           <span className={`status-icon ${taken ? 'taken' : skipped ? 'skipped' : 'pending'}`} style={{ color: taken ? 'var(--accent, #68e5cc)' : undefined }}>{taken ? <Check size={18}/> : skipped ? <SkipForward size={18}/> : <ClipboardList size={18}/>}</span>
-          <span className="row-main"><strong>{peptide?.name ?? protocol?.name ?? t('Slettet protokoll', 'Deleted protocol')}</strong><small className="muted">{dateText(item.day, language)}{item.log ? ` · ${localTime(new Date(item.log.timestamp))}` : ''}</small></span>
+          <span className="row-main"><strong>{peptide?.name ?? protocol?.name ?? item.log?.peptideName ?? t('Slettet protokoll', 'Deleted protocol')}</strong><small className="muted">{dateText(item.day, language)}{item.log ? ` · ${localTime(new Date(item.log.timestamp))}` : ''}</small></span>
           <span className="row-end"><strong>{numberText(item.amount, language)} {unitLabel(item.unit, language)}</strong><small className={`status-label ${taken ? 'taken' : skipped ? 'skipped' : ''}`}>{taken ? t('Tatt', 'Taken') : skipped ? t('Hoppet over', 'Skipped') : t('Ikke logget', 'Not logged')}</small></span>{protocol && <ChevronRight size={16}/>}</button>;
       })}</div>}
     </> : <>
