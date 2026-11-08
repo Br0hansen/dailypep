@@ -142,8 +142,8 @@ export function HistoryView({ data, update, language }: ViewProps) {
   }, [data.measurements]);
   const measurements = [...data.measurements].sort((a, b) => b.day.localeCompare(a.day));
   return <div className="page-section stack">
-    {section === 'measurements' && <div className="section-heading journal-actions"><h2>{t('Dine målinger', 'Your measurements')}</h2><button className="button primary" type="button" onClick={() => setMeasurementEditor('new')}><Plus size={18}/>{t('Ny måling', 'New measurement')}</button></div>}
     <div className="segmented-control" role="group" aria-label={t('Velg historikk', 'Choose history')}><button type="button" className={section === 'injections' ? 'active' : ''} aria-pressed={section === 'injections'} onClick={() => setSection('injections')}><ClipboardList size={16}/>{t('Injeksjoner', 'Injections')}</button><button type="button" className={section === 'measurements' ? 'active' : ''} aria-pressed={section === 'measurements'} onClick={() => setSection('measurements')}><Activity size={16}/>{t('Målinger', 'Measurements')}</button></div>
+    {section === 'measurements' && <div className="section-heading journal-actions"><h2>{t('Dine målinger', 'Your measurements')}</h2><button className="button primary" type="button" onClick={() => setMeasurementEditor('new')}><Plus size={18}/>{t('Ny måling', 'New measurement')}</button></div>}
     {section === 'injections' ? <>
       <p className="muted">{t('Uloggede doser vises for de siste 30 dagene. En glemt dose flytter aldri planen.', 'Unlogged doses are shown for the last 30 days. A missed dose never shifts your schedule.')}</p>
       {history.length === 0 ? <EmptyState icon={<ClipboardList/>} title={t('Ingen oppføringer ennå', 'No entries yet')} description={t('Planlagte og loggede injeksjoner dukker opp her.', 'Your scheduled and logged injections will appear here.')} /> : <div className="card history-list">{history.map(item => {
