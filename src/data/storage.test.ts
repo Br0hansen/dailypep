@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { localScope, readLocal, updateLocal } from './local';
+import { localScope, persistentStorageStatus, readLocal, requestPersistentStorage, updateLocal } from './local';
 
 beforeAll(() => vi.stubGlobal('BroadcastChannel', undefined));
 afterAll(() => vi.unstubAllGlobals());
@@ -26,5 +26,17 @@ describe('local durable saving', () => {
     await updateLocal(scope, data => ({ ...data, settings: { ...data.settings, language: 'nb' } }));
     await expect(updateLocal(scope, data => ({ ...data, version: 2 } as never))).rejects.toThrow();
     expect((await readLocal(scope)).settings.language).toBe('nb');
+  });
+
+  it('reports and requests durable browser storage without assuming support', async () => {
+    vi.stubGlobal('navigator', { storage: { persisted: vi.fn().mockResolvedValue(false), persist: vi.fn().mockResolvedValue(true) } });
+    expect(await persistentStorageStatus()).toBe('not-granted');
+    expect(await requestPersistentStorage()).toBe('granted');
+  });
+
+  it('degrades safely when the persistence API is unavailable', async () => {
+    vi.stubGlobal('navigator', {});
+    expect(await persistentStorageStatus()).toBe('unsupported');
+    expect(await requestPersistentStorage()).toBe('unsupported');
   });
 });

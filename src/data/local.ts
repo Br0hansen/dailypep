@@ -50,6 +50,16 @@ export async function updateLocal(scope: string, updater: (data: AppData) => App
   } finally { db.close(); }
 }
 
-export async function requestPersistentStorage(): Promise<boolean> {
-  return typeof navigator !== 'undefined' && !!navigator.storage?.persist ? navigator.storage.persist() : false;
+export type PersistentStorageStatus = 'granted' | 'not-granted' | 'unsupported';
+
+export async function persistentStorageStatus(): Promise<PersistentStorageStatus> {
+  if (typeof navigator === 'undefined' || !navigator.storage?.persisted) return 'unsupported';
+  try { return await navigator.storage.persisted() ? 'granted' : 'not-granted'; }
+  catch { return 'unsupported'; }
+}
+
+export async function requestPersistentStorage(): Promise<PersistentStorageStatus> {
+  if (typeof navigator === 'undefined' || !navigator.storage?.persist) return 'unsupported';
+  try { return await navigator.storage.persist() ? 'granted' : 'not-granted'; }
+  catch { return 'unsupported'; }
 }

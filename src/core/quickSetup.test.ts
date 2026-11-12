@@ -4,7 +4,7 @@ import { doseContainer } from './dailyActions';
 import { emptyData, validateData } from '../data/validation';
 
 const input: QuickSetupInput = {
-  name: 'BPC-157', color: '#59e0ba', vialAmount: 5, vialUnit: 'mg', waterML: 2,
+  name: 'BPC-157', color: '#59e0ba', container: { kind: 'powder', amount: 5, unit: 'mg', volumeML: 2 },
   doseAmount: 250, doseUnit: 'mcg', rule: { kind: 'interval', days: 1 }, minuteOfDay: 480, startDay: '2026-11-08',
 };
 const ids = { peptide: 'p1', vial: 'v1', protocol: 'pr1', plan: 'plan1' };
@@ -30,10 +30,26 @@ describe('quick setup', () => {
   });
   it('adds a new vial when the content or water differs', () => {
     const first = quickSetup(emptyData(), input, ids);
-    const second = quickSetup(first, { ...input, waterML: 3 }, { peptide: 'p2', vial: 'v2', protocol: 'pr2', plan: 'plan2' });
+    const second = quickSetup(first, { ...input, container: { kind: 'powder', amount: 5, unit: 'mg', volumeML: 3 } }, { peptide: 'p2', vial: 'v2', protocol: 'pr2', plan: 'plan2' });
     expect(second.vials.map(v => v.id)).toEqual(['v1', 'v2']);
     expect(second.protocols[1].vialId).toBe('v2');
     expect(latestVial(second, 'BPC-157')?.id).toBe('v2');
+  });
+  it('creates and reuses a premixed pen with optional click metadata', () => {
+    const penInput: QuickSetupInput = { ...input, container: { kind: 'pen', amount: 10, unit: 'mg', volumeML: 3, totalClicks: 300 } };
+    const first = validateData(quickSetup(emptyData(), penInput, ids));
+    expect(first.vials[0]).toMatchObject({ id: 'v1', kind: 'pen', amount: 10, unit: 'mg', volumeML: 3, totalClicks: 300, preparedAt: '2026-11-08' });
+    expect(first.protocols[0].vialId).toBe('v1');
+    const second = validateData(quickSetup(first, penInput, { peptide: 'p2', vial: 'v2', protocol: 'pr2', plan: 'plan2' }));
+    expect(second.vials).toHaveLength(1);
+    expect(second.protocols[1].vialId).toBe('v1');
+  });
+  it('creates a valid schedule without creating or linking a container', () => {
+    const data = validateData(quickSetup(emptyData(), { ...input, container: { kind: 'none' } }, ids));
+    expect(data.peptides).toHaveLength(1);
+    expect(data.vials).toEqual([]);
+    expect(data.protocols[0]).not.toHaveProperty('vialId');
+    expect(data.protocols[0].phases[0]).toMatchObject({ amount: 250, unit: 'mcg' });
   });
 });
 
@@ -50,7 +66,7 @@ describe('quick setup for blends', () => {
   });
   it('creates the blend peptide, a vial with the summed content and a plan dosed in units', () => {
     const vial = blendVialContent(components);
-    const data = validateData(quickSetup(emptyData(), { ...input, name: 'CJC-1295 + Ipamorelin', vialAmount: vial.amount, vialUnit: vial.unit, doseAmount: 4, doseUnit: 'units', components }, ids));
+    const data = validateData(quickSetup(emptyData(), { ...input, name: 'CJC-1295 + Ipamorelin', container: { kind: 'powder', amount: vial.amount, unit: vial.unit, volumeML: 2 }, doseAmount: 4, doseUnit: 'units', components }, ids));
     expect(data.peptides[0].components).toEqual(components);
     expect(data.vials[0]).toMatchObject({ amount: 10, unit: 'mg', volumeML: 2 });
     expect(data.protocols[0].phases[0]).toMatchObject({ amount: 4, unit: 'units' });

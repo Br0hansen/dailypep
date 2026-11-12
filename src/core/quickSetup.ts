@@ -1,9 +1,14 @@
 import type { AppData, BlendComponent, DoseUnit, Peptide, Protocol, ScheduleRule, Vial } from './types';
 import { calculateDose, convertDose } from './math';
 
+export type QuickSetupContainerInput =
+  | { kind: 'powder'; amount: number; unit: DoseUnit; volumeML: number }
+  | { kind: 'pen'; amount: number; unit: DoseUnit; volumeML: number; totalClicks?: number }
+  | { kind: 'none' };
+
 export interface QuickSetupInput {
   name: string; color: string;
-  vialAmount: number; vialUnit: DoseUnit; waterML: number;
+  container: QuickSetupContainerInput;
   doseAmount: number; doseUnit: DoseUnit;
   rule: ScheduleRule; minuteOfDay: number; startDay: string;
   /** Blend: total content per component. The dose is then in units (U-100). */
@@ -41,8 +46,8 @@ export function blendDraw(components: BlendComponent[], waterML: number, index: 
 }
 
 /**
- * One step: peptide (found or created), powder vial (reused when identical, else created
- * as mixed on the start day) and a single-item plan linked to that vial.
+ * One step: peptide (found or created), optional container (reused when identical,
+ * else created on the start day) and a single-item plan linked when a container exists.
  */
 export function quickSetup(data: AppData, input: QuickSetupInput, ids: QuickSetupIds): AppData {
   const name = input.name.trim();
@@ -59,17 +64,27 @@ export function quickSetup(data: AppData, input: QuickSetupInput, ids: QuickSetu
   }
   const peptideId = peptide.id;
   let vials = data.vials;
-  let vial = vials.find(v => v.peptideId === peptideId && v.kind === 'powder' && v.amount === input.vialAmount
-    && v.unit === input.vialUnit && v.volumeML === input.waterML && !(v.expiresAt && v.expiresAt < input.startDay));
-  if (!vial) {
-    vial = { id: ids.vial, peptideId, kind: 'powder', amount: input.vialAmount, unit: input.vialUnit, volumeML: input.waterML, preparedAt: input.startDay, expiresAt: null };
-    vials = [...vials, vial];
+  let vial: Vial | undefined;
+  if (input.container.kind !== 'none') {
+    const container = input.container;
+    vial = vials.find(v => v.peptideId === peptideId && v.kind === container.kind && v.amount === container.amount
+      && v.unit === container.unit && v.volumeML === container.volumeML
+      && (v.totalClicks ?? undefined) === (container.kind === 'pen' ? container.totalClicks : undefined)
+      && !(v.expiresAt && v.expiresAt < input.startDay));
+    if (!vial) {
+      vial = {
+        id: ids.vial, peptideId, kind: container.kind, amount: container.amount, unit: container.unit,
+        volumeML: container.volumeML, preparedAt: input.startDay, expiresAt: null,
+        ...(container.kind === 'pen' && container.totalClicks !== undefined ? { totalClicks: container.totalClicks } : {}),
+      };
+      vials = [...vials, vial];
+    }
   }
   const protocol: Protocol = {
     id: ids.protocol, peptideId, name: peptide.name, planId: ids.plan, planName: peptide.name,
     startDay: input.startDay, endDay: null, rule: input.rule,
     phases: [{ id: ids.protocol, amount: input.doseAmount, unit: input.doseUnit, durationDays: null }],
-    reminderMinuteOfDay: input.minuteOfDay, isActive: true, vialId: vial.id,
+    reminderMinuteOfDay: input.minuteOfDay, isActive: true, ...(vial ? { vialId: vial.id } : {}),
   };
   return { ...data, peptides, vials, protocols: [...data.protocols, protocol] };
 }

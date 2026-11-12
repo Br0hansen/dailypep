@@ -23,7 +23,7 @@ const componentsText=(components:BlendComponent[],language:'nb'|'en')=>component
   return `${numberText(Math.round((mcg?c.amount*1000:c.amount)*100)/100,language)} ${mcg?'mcg':unitLabel(c.unit,language)} ${c.name}`;
 }).join(' + ');
 
-export function TodayView({ data, update, language, onAddPlan }: ViewProps & {onAddPlan:()=>void}) {
+export function TodayView({ data, update, language, onAddPlan, onManageContainer }: ViewProps & {onAddPlan:()=>void;onManageContainer:(peptideId:string)=>void}) {
   const t=(nb:string,en:string)=>language==='nb'?nb:en;
   const [today,setToday]=useState(todayDay());
   useEffect(()=>{const timer=setInterval(()=>setToday(todayDay()),30000);return()=>clearInterval(timer);},[]);
@@ -64,7 +64,7 @@ export function TodayView({ data, update, language, onAddPlan }: ViewProps & {on
       <div className="daily-main"><h3>{peptide?.name||protocol.name}</h3><div className="daily-meta">{protocol.planName&&<span>{protocol.planName}</span>}<span className="daily-dose">{numberText(log?.amount??dose.amount,language)} {unitLabel(log?.unit??dose.unit,language)}</span>{isLastScheduledDose(protocol,dose)&&<span className="badge"><Flag size={12}/>{t('Siste planlagte dose','Last scheduled dose')}</span>}</div>
         {info?.calculation&&<p className="dose-hint">{drawHint({calculation:info.calculation,clicks:info.clicks},language)}</p>}
         {(()=>{const amount=log?.amount??dose.amount;const parts=peptide?.components?.length&&info&&(log?.unit??dose.unit)==='units'?blendPerDose(peptide.components,info.vial.volumeML,amount):null;return parts&&parts.length>1?<p className="dose-hint muted">= {componentsText(parts,language)}</p>:null;})()}
-        {!info&&!log&&<p className="dose-hint muted">{t('Koble en beholder til planen for å se klikk og uttrekk.','Link a container to the plan to see clicks and draw.')}</p>}
+        {!info&&!log&&<div className="dose-missing-container"><p className="dose-hint muted">{t('Koble en beholder til planen for å se klikk og uttrekk.','Link a container to the plan to see clicks and draw.')}</p><button type="button" className="text-button" onClick={()=>onManageContainer(protocol.peptideId)}>{t('Åpne beholdning','Open inventory')}</button></div>}
         {info&&(info.expired||info.futurePrepared||info.insufficient||info.incompatible)&&<p className="container-warning">{info.expired?t('Koblet beholder har passert utløpsdato.','Linked container is past its expiry date.'):info.futurePrepared?t('Beholderens klargjøringsdato ligger frem i tid.','The container preparation date is in the future.'):info.incompatible?t('Kan ikke beregne volum med disse enhetene.','Volume cannot be calculated for these units.'):t('Registrert restinnhold er lavere enn denne mengden.','Recorded remaining content is below this amount.')}</p>}
       </div>
       <div className="daily-actions">{log?<><span className={`log-state ${log.status}`}><Check size={14}/>{log.status==='taken'?t('Tatt','Taken'):t('Hoppet over','Skipped')}</span>{interactive&&<button className="button secondary" disabled={busy.includes(protocol.id)} onClick={()=>void undo(log)}><Undo2 size={14}/>{t('Angre','Undo')}</button>}</>:interactive?<button className="button primary" disabled={busy.includes(protocol.id)} onClick={()=>void quickLog(row)}><Check size={16}/>{busy.includes(protocol.id)?t('Lagrer…','Saving…'):t('Logg som tatt','Log as taken')}</button>:<span className="muted">{t('Planlagt','Scheduled')}</span>}

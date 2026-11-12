@@ -6,12 +6,12 @@ import { daysUntilEmpty, vialRemaining } from '../core/math';
 import { searchCatalog } from '../core/catalog';
 import { Avatar, colors, dateText, EmptyState, Field, Modal, numberText, positive, ruleText, uid, unitLabel, UnitSelect, type ViewProps } from './shared';
 
-type InventoryProps = ViewProps & { onAddPlan?: () => void };
+type InventoryProps = ViewProps & { onAddPlan?: () => void; initialPeptideId?: string | null };
 
-export function PeptidesView({ data, update, language, onAddPlan }: InventoryProps) {
+export function PeptidesView({ data, update, language, onAddPlan, initialPeptideId }: InventoryProps) {
   const t = (nb: string, en: string) => language === 'nb' ? nb : en;
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(() => initialPeptideId && data.peptides.some(p => p.id === initialPeptideId) ? initialPeptideId : null);
   const [editor, setEditor] = useState<Peptide | 'new' | null>(null);
   const [vialEdit, setVialEdit] = useState<Vial | 'new' | null>(null);
   const [error, setError] = useState('');

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { X, Plus, FlaskConical } from 'lucide-react';
 import type { AppData, DoseUnit, ScheduleRule } from '../core/types';
 export interface ViewProps { data: AppData; update: (updater: (data: AppData) => AppData) => Promise<void>; language: 'nb' | 'en' }
@@ -34,18 +34,39 @@ export function positive(value: string): number | null { const n = Number(value.
  */
 export function SuggestInput({ value, onChange, options, placeholder, required, autoFocus, readOnly, maxLength = 120 }: { value: string; onChange: (value: string) => void; options: string[]; placeholder?: string; required?: boolean; autoFocus?: boolean; readOnly?: boolean; maxLength?: number }) {
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const id = useId();
+  const listboxId = `${id}-suggestions`;
   const term = value.trim().toLocaleLowerCase();
-  const matches = open && term && !readOnly ? [...new Set(options)].filter(o => o.toLocaleLowerCase().includes(term) && o.toLocaleLowerCase() !== term)
+  const candidates = term && !readOnly ? [...new Set(options)].filter(o => o.toLocaleLowerCase().includes(term) && o.toLocaleLowerCase() !== term)
     .sort((a, b) => Number(!a.toLocaleLowerCase().startsWith(term)) - Number(!b.toLocaleLowerCase().startsWith(term))).slice(0, 8) : [];
-  const pick = (option: string) => { onChange(option); setOpen(false); };
+  const matches = open ? candidates : [];
+  useEffect(() => {
+    if (!open || activeIndex >= candidates.length) setActiveIndex(-1);
+  }, [activeIndex, candidates.length, open]);
+  const pick = (option: string) => { onChange(option); setOpen(false); setActiveIndex(-1); };
   return <div className="suggest">
     <input value={value} required={required} autoFocus={autoFocus} readOnly={readOnly} maxLength={maxLength} placeholder={placeholder}
-      autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} role="combobox" aria-expanded={matches.length > 0} aria-autocomplete="list"
-      onChange={event => { onChange(event.target.value); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 150)}
-      onKeyDown={event => { if (event.key === 'Escape') setOpen(false); }}/>
-    {matches.length > 0 && <ul className="suggest-list" role="listbox">{matches.map(option => <li key={option} role="option" aria-selected={false}>
-      {/* Keep focus on the field while tapping; the delayed blur above covers browsers that blur anyway. */}
-      <button type="button" tabIndex={-1} onPointerDown={event => event.preventDefault()} onMouseDown={event => event.preventDefault()} onClick={() => pick(option)}>{option}</button>
-    </li>)}</ul>}
+      autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} role="combobox" aria-haspopup="listbox"
+      aria-expanded={matches.length > 0} aria-autocomplete="list" aria-controls={matches.length > 0 ? listboxId : undefined}
+      aria-activedescendant={activeIndex >= 0 && matches[activeIndex] ? `${id}-option-${activeIndex}` : undefined}
+      onChange={event => { onChange(event.target.value); setOpen(true); setActiveIndex(-1); }} onFocus={() => setOpen(true)}
+      onBlur={() => setTimeout(() => { setOpen(false); setActiveIndex(-1); }, 150)}
+      onKeyDown={event => {
+        if (event.key === 'ArrowDown' && candidates.length) {
+          event.preventDefault(); setOpen(true); setActiveIndex(index => index < candidates.length - 1 ? index + 1 : 0);
+        } else if (event.key === 'ArrowUp' && candidates.length) {
+          event.preventDefault(); setOpen(true); setActiveIndex(index => index > 0 ? index - 1 : candidates.length - 1);
+        } else if (event.key === 'Enter' && open && activeIndex >= 0 && candidates[activeIndex]) {
+          event.preventDefault(); pick(candidates[activeIndex]);
+        } else if (event.key === 'Escape' && open) {
+          event.preventDefault(); setOpen(false); setActiveIndex(-1);
+        }
+      }}/>
+    {matches.length > 0 && <ul id={listboxId} className="suggest-list" role="listbox">{matches.map((option, index) => <li
+      id={`${id}-option-${index}`} key={option} role="option" aria-selected={activeIndex === index}
+      className={`suggest-option ${activeIndex === index ? 'active' : ''}`}
+      onPointerDown={event => event.preventDefault()} onMouseDown={event => event.preventDefault()}
+      onPointerMove={() => setActiveIndex(index)} onClick={() => pick(option)}>{option}</li>)}</ul>}
   </div>;
 }
