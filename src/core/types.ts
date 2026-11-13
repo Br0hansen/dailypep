@@ -41,7 +41,7 @@ export interface CycleItem {
   components?: BlendComponent[];
 }
 export interface SavedCycle { id: string; name: string; items: CycleItem[]; lastStartedAt: string | null }
-export interface Settings { language: 'nb' | 'en'; theme: 'electric' | 'corall' }
+export interface Settings { language: 'nb' | 'en'; theme: 'electric' | 'corall' | 'signal' | 'slate' }
 export interface AppData {
   version: 1; peptides: Peptide[]; protocols: Protocol[]; vials: Vial[]; logs: InjectionLog[];
   measurements: Measurement[]; cycles: SavedCycle[]; settings: Settings;

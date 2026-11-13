@@ -62,7 +62,7 @@ export function validateData(input: unknown): AppData {
         && optional(i.durationDays, v => nullable(v, boundedDays)) && optional(i.startOffsetDays, v => boundedDays(v, 0))
         && optional(i.components, v => Array.isArray(v) && v.length > 0 && v.length <= 100
           && v.every(c => record(c) && str(c.name, 300) && !!c.name.trim() && positive(c.amount) && choice(c.unit, ['mg', 'mcg', 'iu'])))))
-    && record(input.settings) && choice(input.settings.language, ['nb', 'en']) && choice(input.settings.theme, ['electric', 'corall']);
+    && record(input.settings) && choice(input.settings.language, ['nb', 'en']) && choice(input.settings.theme, ['electric', 'corall', 'signal', 'slate']);
   if (!good) throw new Error('The DailyPep backup contains invalid or incomplete data.');
   const data = input as unknown as AppData;
   const peptideIds = new Set(data.peptides.map(p => p.id));

@@ -16,6 +16,14 @@ function legacyWorkspace(): AppData {
 }
 
 describe('validated backup format', () => {
+  it('keeps older themes and accepts the added palettes', () => {
+    expect(importData(exportData(emptyData())).settings.theme).toBe('electric');
+    for (const theme of ['corall', 'signal', 'slate'] as const) {
+      const data = emptyData();
+      data.settings.theme = theme;
+      expect(importData(exportData(data)).settings.theme).toBe(theme);
+    }
+  });
   it('round trips an empty workspace without inventing records', () => {
     expect(importData(exportData(emptyData()))).toEqual(emptyData());
   });
