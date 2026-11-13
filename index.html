@@ -3,10 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b1117" />
+    <meta name="theme-color" content="#121613" />
     <meta name="description" content="DailyPep — your personal injection journal and planner. Works offline, with optional cloud backup." />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('dailypep-appearance');
+          var appearance = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'dark';
+          var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var mode = appearance === 'system' ? (dark ? 'dark' : 'light') : appearance;
+          document.documentElement.dataset.appearance = mode;
+          document.documentElement.style.colorScheme = mode;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', mode === 'light' ? '#f4f1ea' : '#121613');
+        } catch (e) {}
+      })();
+    </script>
     <meta name="apple-mobile-web-app-title" content="DailyPep" />
     <link rel="icon" type="image/png" href="./icon-192.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />

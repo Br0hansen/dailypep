@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './styles.css';
+import './lumen.css';
 
 // Production updates wait until the user accepts. An open form must never
 // disappear because another version was deployed.

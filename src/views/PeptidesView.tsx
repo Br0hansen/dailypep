@@ -1,14 +1,14 @@
 import { useState, type FormEvent } from 'react';
-import { Activity, Archive, ArrowUpRight, ChevronRight, FlaskConical, Pencil, Plus, Search, Trash2 } from 'lucide-react';
+import { Activity, Archive, ArrowUpRight, Calculator, ChevronRight, FlaskConical, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import type { Peptide, Vial } from '../core/types';
 import { todayDay } from '../core/schedule';
 import { daysUntilEmpty, vialRemaining } from '../core/math';
 import { searchCatalog } from '../core/catalog';
 import { Avatar, colors, dateText, EmptyState, Field, Modal, numberText, positive, ruleText, uid, unitLabel, UnitSelect, type ViewProps } from './shared';
 
-type InventoryProps = ViewProps & { onAddPlan?: () => void; initialPeptideId?: string | null };
+type InventoryProps = ViewProps & { onAddPlan?: () => void; onOpenTools?: () => void; initialPeptideId?: string | null };
 
-export function PeptidesView({ data, update, language, onAddPlan, initialPeptideId }: InventoryProps) {
+export function PeptidesView({ data, update, language, onAddPlan, onOpenTools, initialPeptideId }: InventoryProps) {
   const t = (nb: string, en: string) => language === 'nb' ? nb : en;
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(() => initialPeptideId && data.peptides.some(p => p.id === initialPeptideId) ? initialPeptideId : null);
@@ -95,7 +95,7 @@ export function PeptidesView({ data, update, language, onAddPlan, initialPeptide
         </article>)}</div> : <p className="muted">{t('Dette peptidet er registrert i beholdningen. Opprett en plan under Planer når du vil legge til mengde og dager.', 'This peptide is in your inventory. Create a plan in Plans when you want to add an amount and schedule.')}</p>}
       </section>
     </> : <>
-      <div className="section-heading"><div><h2>{t('Peptider og beholdere', 'Peptides & containers')}</h2><p className="muted">{t('Registrer det du har. Planer opprettes separat under Planer.', 'Keep track of what you have. Create schedules in Plans.')}</p></div><button className="button primary" onClick={() => setEditor('new')}><Plus size={17}/>{t('Legg til peptid', 'Add peptide')}</button></div>
+      <div className="inventory-toolbar"><h2 className="sr-only">{t('Peptider og beholdere', 'Peptides & containers')}</h2>{onOpenTools && <button className="button secondary" onClick={onOpenTools}><Calculator size={16}/>{t('Kalkulator', 'Calculator')}</button>}{data.peptides.length > 0 && <button className="button primary" onClick={() => setEditor('new')}><Plus size={17}/>{t('Legg til peptid', 'Add peptide')}</button>}</div>
       {data.peptides.length > 0 && <label className="search-field"><Search size={18}/><input aria-label={t('Søk i beholdning', 'Search inventory')} placeholder={t('Søk etter peptid…', 'Search peptides…')} value={query} onChange={event => setQuery(event.target.value)}/></label>}
       {shown.length ? <div className="peptide-grid inventory-grid">{shown.map(item => <button className="card peptide-card" key={item.id} onClick={() => setSelected(item.id)}><Avatar name={item.name} color={item.color}/><div className="grow"><h3>{item.name}</h3><p className="muted">{(() => { const vials = data.vials.filter(v => v.peptideId === item.id).length; const active = data.protocols.filter(p => p.peptideId === item.id && p.isActive).length; return `${vials} ${vials === 1 ? t('beholder', 'container') : t('beholdere', 'containers')} · ${active} ${active === 1 ? t('aktiv planoppføring', 'active plan item') : t('aktive planoppføringer', 'active plan items')}`; })()}</p></div><ChevronRight size={20}/></button>)}</div> : <EmptyState icon={<FlaskConical size={30}/>} title={query ? t('Ingen treff', 'No matches') : t('Hva har du i beholdningen?', 'What is in your inventory?')} description={query ? t('Prøv et annet navn.', 'Try a different name.') : t('Legg til et peptid, og registrer deretter glass eller penn. Dette legger ikke til doser i kalenderen.', 'Add a peptide, then record its vial or pen. This does not add doses to your calendar.')} action={!query ? <button className="button primary" onClick={() => setEditor('new')}><Plus size={16}/>{t('Legg til første peptid', 'Add your first peptide')}</button> : undefined}/>}
     </>}

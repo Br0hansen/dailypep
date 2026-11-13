@@ -1,0 +1,762 @@
+/* Lumen — quiet, warm, phone-first layer. Sits on top of the existing rules. */
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+
+:root[data-appearance="light"] {
+  --bg: #f4f1ea;
+  --surface: #fffcf8;
+  --surface-high: #fffdfb;
+  --ink: #1c1915;
+  --muted: #6f675e;
+  --line: #e5ddd2;
+  --accent: #0e7a5f;
+  --accent-soft: #0e7a5f16;
+  --accent-ink: #ffffff;
+  --danger: #b42318;
+  --warning: #8a5a10;
+  color-scheme: light;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+:root[data-appearance="light"][data-theme="corall"] {
+  --accent: #a33d4a;
+  --accent-soft: #a33d4a14;
+  --accent-ink: #ffffff;
+}
+
+:root[data-appearance="dark"] {
+  --bg: #121613;
+  --surface: #1c221e;
+  --surface-high: #242b26;
+  --ink: #f4f1ea;
+  --muted: #a8a094;
+  --line: #313a34;
+  --accent: #8ee0c4;
+  --accent-soft: #8ee0c41f;
+  --accent-ink: #10241c;
+  --danger: #ffb4ab;
+  --warning: #e6c597;
+  color-scheme: dark;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+:root[data-appearance="dark"][data-theme="corall"] {
+  --bg: #161311;
+  --surface: #241f1c;
+  --surface-high: #2e2824;
+  --line: #3d3530;
+  --accent: #f3a8ae;
+  --accent-soft: #f3a8ae1f;
+  --accent-ink: #3d1518;
+  background: var(--bg);
+}
+
+:root[data-appearance="light"] .lumen {
+  --bg: #f4f1ea;
+  --surface: #fffcf8;
+  --surface-high: #fffdfb;
+  --ink: #1c1915;
+  --muted: #6f675e;
+  --line: #e5ddd2;
+  --accent: #0e7a5f;
+  --accent-soft: #0e7a5f16;
+  --accent-ink: #ffffff;
+  --danger: #b42318;
+  --warning: #8a5a10;
+}
+
+:root[data-appearance="light"][data-theme="corall"] .lumen {
+  --accent: #a33d4a;
+  --accent-soft: #a33d4a14;
+  --accent-ink: #ffffff;
+}
+
+:root[data-appearance="dark"] .lumen {
+  --bg: #121613;
+  --surface: #1c221e;
+  --surface-high: #242b26;
+  --ink: #f4f1ea;
+  --muted: #a8a094;
+  --line: #313a34;
+  --accent: #8ee0c4;
+  --accent-soft: #8ee0c41f;
+  --accent-ink: #10241c;
+  --danger: #ffb4ab;
+  --warning: #e6c597;
+}
+
+:root[data-appearance="dark"][data-theme="corall"] .lumen {
+  --bg: #161311;
+  --surface: #241f1c;
+  --surface-high: #2e2824;
+  --line: #3d3530;
+  --accent: #f3a8ae;
+  --accent-soft: #f3a8ae1f;
+  --accent-ink: #3d1518;
+}
+
+::selection { background: var(--accent-soft); color: var(--ink); }
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 80;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 650;
+}
+.skip-link:focus { top: calc(8px + env(safe-area-inset-top)); }
+
+:root[data-appearance] .lumen {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-height: 100dvh;
+}
+:root[data-appearance] .lumen h1,
+:root[data-appearance] .lumen h2,
+:root[data-appearance] .lumen h3,
+:root[data-appearance] .lumen h4,
+:root[data-appearance] .boot-screen h1 {
+  font-family: inherit;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+:root[data-appearance] .lumen .muted,
+:root[data-appearance] .lumen small { color: var(--muted); }
+:root[data-appearance] .boot-screen {
+  background: var(--bg);
+  color: var(--accent);
+  min-height: 100dvh;
+}
+
+/* Chrome */
+@media (min-width: 761px) {
+  :root[data-appearance] .lumen .sidebar {
+    display: flex;
+    width: 232px;
+    background: var(--bg);
+    border-right: 1px solid var(--line);
+    padding: 28px 16px 20px;
+  }
+  :root[data-appearance] .lumen .workspace { margin-left: 232px; }
+}
+:root[data-appearance] .lumen .brand {
+  padding: 4px 12px 28px;
+  gap: 10px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+}
+.brand-mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+  flex-shrink: 0;
+}
+:root[data-appearance] .lumen .nav-item {
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+:root[data-appearance] .lumen .nav-item.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+:root[data-appearance] .lumen .nav-item:hover:not(:disabled) { background: var(--accent-soft); color: var(--ink); }
+:root[data-appearance] .lumen .sidebar-bottom { padding-top: 12px; }
+
+:root[data-appearance] .lumen .topbar {
+  height: auto;
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: block;
+  background: color-mix(in srgb, var(--bg) 86%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+}
+:root[data-appearance] .lumen .topbar-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 28px 12px;
+}
+:root[data-appearance] .lumen .topbar-title { min-width: 0; }
+:root[data-appearance] .lumen .topbar h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0;
+}
+:root[data-appearance] .lumen .date-label {
+  margin: 3px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+:root[data-appearance] .lumen .back-link {
+  padding: 0 0 2px;
+  min-height: 0;
+  font-size: 13px;
+  justify-content: flex-start;
+}
+:root[data-appearance] .lumen .topbar-actions { flex-shrink: 0; gap: 4px; }
+:root[data-appearance] .lumen main {
+  max-width: 920px;
+  padding: 16px 28px 48px;
+}
+
+/* Controls */
+:root[data-appearance] .lumen button {
+  color: var(--ink);
+  background: var(--surface-high);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 15px;
+  box-shadow: none;
+  transform: none;
+}
+:root[data-appearance] .lumen button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 5%, var(--surface-high));
+  border-color: var(--line);
+  transform: none;
+}
+:root[data-appearance] .lumen button.primary,
+:root[data-appearance] .lumen .button.primary,
+:root[data-appearance] .lumen button.primary:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: transparent;
+  box-shadow: none;
+}
+:root[data-appearance] .lumen button.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 88%, #000);
+}
+:root[data-appearance] .lumen button.secondary,
+:root[data-appearance] .lumen .button.secondary {
+  background: transparent;
+  color: var(--ink);
+}
+:root[data-appearance] .lumen button.danger,
+:root[data-appearance] .lumen .icon-button.danger {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 28%, transparent);
+}
+:root[data-appearance] .lumen button.text-button,
+:root[data-appearance] .lumen .text-button {
+  background: transparent;
+  border-color: transparent;
+  color: var(--accent);
+  box-shadow: none;
+}
+:root[data-appearance] .lumen button.text-button:hover:not(:disabled) { background: var(--accent-soft); }
+:root[data-appearance] .lumen .icon-button,
+:root[data-appearance] .lumen .topbar .icon-button {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+}
+:root[data-appearance] .lumen .icon-button:hover:not(:disabled) { background: var(--accent-soft); }
+:root[data-appearance] .lumen .add-icon,
+:root[data-appearance] .lumen .add-icon:hover:not(:disabled) {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: transparent;
+}
+:root[data-appearance] .lumen input,
+:root[data-appearance] .lumen select,
+:root[data-appearance] .lumen textarea {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--line);
+  border-radius: 12px;
+  font-size: 16px;
+}
+:root[data-appearance] .lumen input::placeholder,
+:root[data-appearance] .lumen textarea::placeholder { color: var(--muted); opacity: 1; }
+:root[data-appearance] .lumen label,
+:root[data-appearance] .lumen .field { color: var(--muted); font-size: 13px; }
+
+/* Surfaces */
+:root[data-appearance] .lumen .card,
+:root[data-appearance] .lumen .plan-card,
+:root[data-appearance] .lumen .template-card,
+:root[data-appearance] .lumen .stock-card,
+:root[data-appearance] .lumen .protocol-card,
+:root[data-appearance] .lumen .daily-agenda,
+:root[data-appearance] .lumen .day-clear,
+:root[data-appearance] .lumen .calculator-result,
+:root[data-appearance] .lumen .plan-review-item {
+  background: var(--surface);
+  background-image: none;
+  border-color: var(--line);
+  color: var(--ink);
+  border-radius: 18px;
+  box-shadow: none;
+}
+:root[data-appearance] .lumen .empty-state {
+  background: transparent;
+  border-color: var(--line);
+  color: var(--ink);
+}
+:root[data-appearance] .lumen .first-plan-state {
+  background: var(--surface) !important;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  border-radius: 20px;
+}
+:root[data-appearance] .lumen .first-plan-icon,
+:root[data-appearance] .lumen .empty-icon,
+:root[data-appearance] .lumen .result-icon,
+:root[data-appearance] .lumen .icon-chip {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: transparent;
+  box-shadow: none;
+}
+:root[data-appearance] .lumen .eyebrow { letter-spacing: 0.08em; font-size: 11px; }
+:root[data-appearance] .lumen .app-footer {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  padding: 28px 8px 8px;
+}
+
+/* Today */
+:root[data-appearance] .lumen .agenda-heading {
+  justify-content: flex-end;
+  border-bottom: 0;
+  padding: 14px 16px 0;
+}
+:root[data-appearance] .lumen .daily-count {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  font-weight: 650;
+  font-size: 12px;
+}
+:root[data-appearance] .lumen .daily-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: transparent;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: nowrap;
+}
+:root[data-appearance] .lumen .daily-row:last-child { border-bottom: 0; }
+:root[data-appearance] .lumen .daily-main { min-width: 0; flex-basis: auto; }
+:root[data-appearance] .lumen .daily-topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+:root[data-appearance] .lumen .daily-topline h3 { font-size: 16px; font-weight: 650; }
+:root[data-appearance] .lumen .daily-time {
+  display: block;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+:root[data-appearance] .lumen .daily-dose { color: var(--ink); font-weight: 600; margin: 0; font-size: 14px; }
+:root[data-appearance] .lumen .daily-meta,
+:root[data-appearance] .lumen .dose-hint { color: var(--muted); }
+:root[data-appearance] .lumen .log-state { color: var(--accent); font-weight: 650; }
+:root[data-appearance] .lumen .log-state.skipped { color: var(--muted); }
+:root[data-appearance] .lumen .daily-actions {
+  margin: 0;
+  flex-basis: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 2px;
+}
+:root[data-appearance] .lumen .daily-actions > .primary,
+:root[data-appearance] .lumen .log-button {
+  min-width: 0;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 10px 16px;
+  white-space: nowrap;
+}
+:root[data-appearance] .lumen .registered-list { background: color-mix(in srgb, var(--ink) 3%, var(--surface)); }
+:root[data-appearance] .lumen .registered-heading {
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+  font-weight: 650;
+}
+:root[data-appearance] .lumen .week-day,
+:root[data-appearance] .lumen .day-tile {
+  background: var(--bg);
+  color: var(--ink);
+  border-color: var(--line);
+  border-radius: 12px;
+  min-width: 0;
+}
+:root[data-appearance] .lumen .week-day { min-height: 72px; padding: 8px 2px; gap: 4px; }
+:root[data-appearance] .lumen .week-day > span,
+:root[data-appearance] .lumen .week-day small,
+:root[data-appearance] .lumen .day-tile > span { color: var(--muted); }
+:root[data-appearance] .lumen .week-day.is-today,
+:root[data-appearance] .lumen .day-tile.is-today,
+:root[data-appearance] .lumen .week-day.is-today > span,
+:root[data-appearance] .lumen .week-day.is-today small,
+:root[data-appearance] .lumen .week-day.is-today strong,
+:root[data-appearance] .lumen .day-tile.is-today strong {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+:root[data-appearance] .lumen .week-day.has-plans small { color: var(--accent); font-weight: 700; }
+:root[data-appearance] .lumen .week-strip { min-width: 0; }
+:root[data-appearance] .lumen .badge {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 999px;
+  font-weight: 650;
+}
+
+/* Lists, plans, calculator */
+:root[data-appearance] .lumen .plans-switch,
+:root[data-appearance] .lumen .segmented-control,
+:root[data-appearance] .lumen .calculator-tabs {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  width: min(100%, 440px);
+}
+:root[data-appearance] .lumen .segmented-control,
+:root[data-appearance] .lumen .calculator-tabs { width: 100%; }
+:root[data-appearance] .lumen .plans-switch button,
+:root[data-appearance] .lumen .segmented-control button,
+:root[data-appearance] .lumen .calculator-tabs button,
+:root[data-appearance] .lumen .frequency-chips button {
+  background: transparent;
+  border: 0;
+  color: var(--muted);
+  box-shadow: none;
+  flex: 1;
+}
+:root[data-appearance] .lumen .plans-switch button.active,
+:root[data-appearance] .lumen .segmented-control button.active,
+:root[data-appearance] .lumen .segmented-control button[aria-pressed="true"],
+:root[data-appearance] .lumen .calculator-tabs button.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+:root[data-appearance] .lumen .frequency-chips button {
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  flex: 0 0 auto;
+}
+:root[data-appearance] .lumen .frequency-chips button.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+:root[data-appearance] .lumen button.history-row,
+:root[data-appearance] .lumen button.list-row {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  color: var(--ink);
+  font-weight: 500;
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+:root[data-appearance] .lumen button.peptide-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--ink);
+  text-align: left;
+}
+:root[data-appearance] .lumen button.peptide-card:hover:not(:disabled),
+:root[data-appearance] .lumen button.history-row:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ink) 4%, var(--surface));
+}
+:root[data-appearance] .lumen .plan-wizard-item,
+:root[data-appearance] .lumen .blend-quick,
+:root[data-appearance] .lumen .blend-component-row,
+:root[data-appearance] .lumen .draw-result,
+:root[data-appearance] .lumen .search-field,
+:root[data-appearance] .lumen .suggest-list {
+  background: var(--bg);
+  border-color: var(--line);
+  color: var(--ink);
+}
+:root[data-appearance] .lumen .draw-result.ready {
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent);
+}
+:root[data-appearance] .lumen .draw-result strong { color: var(--ink); }
+:root[data-appearance] .lumen .draw-result.ready strong { color: var(--accent); }
+:root[data-appearance] .lumen .draw-result .draw-components { color: var(--ink); }
+:root[data-appearance] .lumen .suggest-option { color: var(--ink); background: transparent; border: 0; }
+:root[data-appearance] .lumen .suggest-option.active,
+:root[data-appearance] .lumen .suggest-option[aria-selected="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+:root[data-appearance] .lumen .search-field input { border: 0; background: transparent; }
+:root[data-appearance] .lumen .calculator-number,
+:root[data-appearance] .lumen .result-value { color: var(--accent); }
+:root[data-appearance] .lumen .info-note {
+  background: var(--accent-soft);
+  color: var(--ink);
+  border-left-color: var(--accent);
+}
+:root[data-appearance] .lumen .stock-track { background: var(--line); }
+:root[data-appearance] .lumen .plan-needs-link {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  color: var(--ink);
+  width: 100%;
+}
+:root[data-appearance] .lumen .inventory-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+:root[data-appearance] .lumen .color-picker label:has(input:checked) {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+
+/* Feedback */
+:root[data-appearance] .lumen .notice,
+:root[data-appearance] .lumen .daily-notice,
+:root[data-appearance] .lumen .post-value-guidance {
+  background: var(--accent-soft);
+  color: var(--ink);
+  border-color: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+:root[data-appearance] .lumen .error,
+:root[data-appearance] .lumen .error-banner {
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+:root[data-appearance] .lumen .success-banner {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+:root[data-appearance] .lumen .container-warning { color: var(--warning); }
+
+/* Settings sheet */
+:root[data-appearance] .lumen dialog.modal {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 24px 80px color-mix(in srgb, #000 28%, transparent);
+}
+:root[data-appearance] .lumen dialog.modal::backdrop {
+  background: color-mix(in srgb, #1c1915 46%, transparent);
+}
+:root[data-appearance] .lumen .modal-header h2 { font-size: 20px; }
+:root[data-appearance] .lumen .settings-section {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin: 0 0 12px;
+  gap: 12px;
+}
+:root[data-appearance] .lumen .settings-section h3 { color: var(--ink); font-size: 15px; }
+:root[data-appearance] .lumen .settings-section p { color: var(--muted); font-size: 14px; }
+:root[data-appearance] .lumen .settings-section label { grid-template-columns: 1fr; }
+:root[data-appearance] .lumen .settings-section .segmented-control { width: 100%; }
+:root[data-appearance] .lumen .field-caption { font-size: 13px; font-weight: 650; color: var(--muted); }
+:root[data-appearance] .lumen .accent-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+:root[data-appearance] .lumen .accent-picker button {
+  justify-content: flex-start;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 44px;
+}
+:root[data-appearance] .lumen .accent-picker button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.accent-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.accent-dot.sea { background: #0e7a5f; }
+.accent-dot.coral { background: #c24b57; }
+:root[data-appearance] .lumen .tool-link {
+  width: 100%;
+  justify-content: flex-start;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 56px;
+  text-align: left;
+  gap: 12px;
+}
+:root[data-appearance] .lumen .tool-link span { display: grid; gap: 2px; min-width: 0; }
+:root[data-appearance] .lumen .tool-link strong { font-weight: 650; }
+:root[data-appearance] .lumen .tool-link svg:last-child { margin-left: auto; }
+:root[data-appearance] .lumen .install-steps {
+  margin: 0;
+  padding-left: 1.15em;
+  display: grid;
+  gap: 6px;
+  color: var(--ink);
+}
+:root[data-appearance] .lumen .install-steps li { font-size: 14px; line-height: 1.45; }
+:root[data-appearance] .lumen .account-email { color: var(--ink) !important; font-weight: 650; }
+
+:root[data-appearance] .lumen .plan-stepper li > span {
+  background: var(--line);
+  color: var(--ink);
+}
+:root[data-appearance] .lumen .plan-stepper li.current > span,
+:root[data-appearance] .lumen .plan-stepper li.complete > span {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+:root[data-appearance] .lumen .calc-step h3 > span {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+@media (max-width: 760px) {
+  :root[data-appearance] .lumen .sidebar { display: none; }
+  :root[data-appearance] .lumen .workspace { margin-left: 0; }
+  :root[data-appearance] .lumen .topbar-inner {
+    align-items: center;
+    padding: calc(10px + env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left));
+  }
+  :root[data-appearance] .lumen .topbar h1 { font-size: 22px; }
+  :root[data-appearance] .lumen .date-label { font-size: 13px; }
+  :root[data-appearance] .lumen main {
+    padding: 8px max(16px, env(safe-area-inset-right)) calc(112px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  }
+  :root[data-appearance] .lumen .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 30;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--line);
+    padding: 4px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  :root[data-appearance] .lumen .mobile-nav button {
+    flex-direction: column;
+    gap: 2px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    min-height: 48px;
+    padding: 4px 2px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  :root[data-appearance] .lumen .mobile-nav button:hover:not(:disabled),
+  :root[data-appearance] .lumen .mobile-nav button.active {
+    background: transparent;
+    color: var(--accent);
+  }
+  :root[data-appearance] .lumen dialog.modal {
+    margin: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(92dvh, 100%);
+    border-radius: 22px 22px 0 0;
+    border-bottom: 0;
+  }
+  :root[data-appearance] .lumen dialog.modal::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 5px;
+    border-radius: 99px;
+    background: var(--line);
+    margin: 8px auto 0;
+  }
+  :root[data-appearance] .lumen .settings-section .button-row { flex-direction: column; align-items: stretch; }
+  :root[data-appearance] .lumen .settings-section .button-row > button,
+  :root[data-appearance] .lumen .settings-section form button { width: 100%; }
+  :root[data-appearance] .lumen .plan-stepper { justify-content: flex-start; gap: 8px; border-bottom: 0; margin-bottom: 4px; padding-bottom: 0; }
+  :root[data-appearance] .lumen .plan-stepper li { flex-direction: row; width: auto; }
+  :root[data-appearance] .lumen .plan-stepper small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  :root[data-appearance] .lumen .week-day { min-height: 64px; }
+  :root[data-appearance] .lumen .daily-row { padding: 12px 12px; gap: 10px; }
+  :root[data-appearance] .lumen .daily-topline { display: block; }
+  :root[data-appearance] .lumen .back-link { min-height: 44px; padding: 8px 0; align-self: flex-start; }
+}
+@media (max-width: 360px) {
+  :root[data-appearance] .lumen .daily-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  :root[data-appearance] .lumen .daily-row .peptide-avatar {
+    grid-row: 1 / span 2;
+    align-self: start;
+  }
+  :root[data-appearance] .lumen .daily-actions {
+    grid-column: 2;
+    justify-content: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-appearance] .lumen button { transition: none; }
+}

@@ -82,9 +82,9 @@ export function CalculatorView({ data, language }: ViewProps) {
   const drawField = <Field label={inverse ? t(`Ønsket uttrekk (${marksLabel})`, `Desired draw (${marksLabel})`) : t(`Hvor mye trekker du opp (${marksLabel})?`, `How much do you draw (${marksLabel})?`)}><input inputMode="decimal" type="number" min="0" step="any" value={markCount} onChange={event => setMarkCount(event.target.value)} placeholder="—" /></Field>;
   return <div className="stack calculator-workspace">
     <div className="calculator-tabs" role="group" aria-label={t('Velg beregning', 'Choose calculation')}>{([
-      { id: 'draw', nb: 'Beregn uttrekk', en: 'Calculate draw', icon: Syringe },
-      { id: 'recon', nb: 'Velg uttrekk → finn væske', en: 'Choose draw → find liquid', icon: Droplets },
-      { id: 'blend', nb: 'Forstå en blend', en: 'Understand a blend', icon: Layers3 },
+      { id: 'draw', nb: 'Uttrekk', en: 'Draw', icon: Syringe },
+      { id: 'recon', nb: 'Væske', en: 'Liquid', icon: Droplets },
+      { id: 'blend', nb: 'Blend', en: 'Blend', icon: Layers3 },
     ] as const).map(tab => <button type="button" key={tab.id} className={mode === tab.id ? 'active' : ''} aria-pressed={mode === tab.id} onClick={() => chooseMode(tab.id)}><tab.icon size={17} />{language === 'nb' ? tab.nb : tab.en}</button>)}</div>
     <div className="calculator-layout"><section className="card stack calculator-inputs">
       <div><h2>{mode === 'draw' ? t('Fra din dose til uttrekk', 'From your dose to a draw') : mode === 'recon' ? t('Hvor mye væske trenger glasset?', 'How much liquid does the vial need?') : t('Hva inneholder hvert uttrekk?', 'What is in each draw?')}</h2><p className="muted">{mode === 'draw' ? t('Oppgi innhold, væskevolum og din egen dose.', 'Enter the content, liquid volume and your own dose.') : mode === 'recon' ? t('Oppgi innholdet og din egen dose. Velg ønsket uttrekk for å beregne væskevolumet.', 'Enter the content and your own dose. Choose your desired draw to calculate the liquid volume.') : t('Oppgi mengden av hver komponent i hele glasset. Appen viser dem separat per uttrekk.', 'Enter each component’s amount in the entire vial. See each one separately per draw.')}</p></div>
