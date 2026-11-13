@@ -1,0 +1,8 @@
+project_id = "tgqcyfviukurtovtxphy"
+
+[functions.test-push]
+verify_jwt = true
+
+# Called only by Supabase Cron with a secret API key in the apikey header.
+[functions.send-reminders]
+verify_jwt = false

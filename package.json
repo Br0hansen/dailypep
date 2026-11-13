@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --host localhost --port 3000 --strictPort",
     "build": "tsc -b && vite build",
+    "check:functions": "npx --yes deno@2.5.4 check --config supabase/functions/test-push/deno.json supabase/functions/test-push/index.ts && npx --yes deno@2.5.4 check --config supabase/functions/send-reminders/deno.json supabase/functions/send-reminders/index.ts",
     "preview": "vite preview --host localhost --port 3000 --strictPort",
     "test": "vitest run",
     "test:watch": "vitest",

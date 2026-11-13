@@ -53,4 +53,5 @@ html,body{overflow-x:clip}
 .modal input,.modal select,.modal textarea{min-width:0;max-width:100%}
 .modal input[type=date],.modal input[type=time]{-webkit-appearance:none;appearance:none;width:100%;display:block}
 .post-value-guidance{justify-content:space-between;flex-wrap:wrap}.post-value-guidance>span{flex:1;min-width:min(260px,100%)}.post-value-guidance .button-row{margin-left:auto}
+.push-settings>button.primary{justify-self:start}.push-settings .success-banner,.push-settings .error-banner{margin:0}
 @media(max-width:760px){button,.icon-button{min-height:44px}.icon-button{min-width:44px}input:not([type=checkbox]):not([type=radio]),select{min-height:44px}.section-heading button,.plans-switch button,.weekday-picker label,.toggle-row{min-height:44px}.electric-refined .color-picker label{width:44px;height:44px}.modal .wizard-actions{position:static;bottom:auto;background:transparent;padding-bottom:0;box-shadow:none}.modal{scroll-padding-bottom:24px}}

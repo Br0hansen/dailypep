@@ -11,6 +11,9 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (acceptedUpdate) window.location.reload();
     });
+    navigator.serviceWorker.addEventListener('message', event => {
+      if (event.data?.type === 'DAILYPEP_OPEN' && event.data.page === 'today') window.location.hash = '#today';
+    });
     const baseURL = new URL(import.meta.env.BASE_URL, document.baseURI);
     void navigator.serviceWorker.register(new URL('sw.js', baseURL), { scope: baseURL.pathname })
       .then((registration) => {

@@ -72,6 +72,36 @@ self.addEventListener('fetch', event => {
     return (await cache.match(request)) || fetch(request);
   })());
 });
+self.addEventListener('push', event => {
+  let payload = {};
+  try { payload = event.data?.json() || {}; } catch { payload = {}; }
+  const language = payload.language === 'nb' ? 'nb' : 'en';
+  // Keep lock-screen copy generic even if a malformed or compromised sender
+  // includes extra fields in the payload.
+  const body = language === 'nb' ? 'Du har en planlagt registrering.' : 'You have a scheduled entry.';
+  const occurrence = typeof payload.occurrence === 'string' ? payload.occurrence : 'scheduled';
+  event.waitUntil(self.registration.showNotification('DailyPep', {
+    body,
+    icon: new URL('icon-192.png', SCOPE).href,
+    badge: new URL('icon-192.png', SCOPE).href,
+    tag: 'dailypep-reminder-' + occurrence,
+    renotify: false,
+    data: { url: new URL('#today', SCOPE).href },
+  }));
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const target = event.notification.data?.url || new URL('#today', SCOPE).href;
+  event.waitUntil((async () => {
+    const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const existing = windows.find(client => client.url.startsWith(SCOPE));
+    if (existing) {
+      existing.postMessage({ type: 'DAILYPEP_OPEN', page: 'today' });
+      return existing.focus();
+    }
+    return self.clients.openWindow(target);
+  })());
+});
 ` });
     },
   };

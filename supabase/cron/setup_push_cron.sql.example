@@ -1,0 +1,32 @@
+-- First create these in Supabase Vault:
+-- dailypep_project_url and dailypep_automations_key.
+-- This checked-in query never contains either decrypted value.
+
+do $$
+begin
+  if not exists (select 1 from vault.secrets where name = 'dailypep_project_url')
+    or not exists (select 1 from vault.secrets where name = 'dailypep_automations_key')
+  then
+    raise exception 'Create the DailyPep cron secrets in Vault first';
+  end if;
+end
+$$;
+
+select cron.unschedule(jobid)
+from cron.job
+where jobname = 'dailypep-send-push-reminders';
+
+select cron.schedule(
+  'dailypep-send-push-reminders',
+  '* * * * *',
+  $$
+  select net.http_post(
+    url := (select decrypted_secret from vault.decrypted_secrets where name = 'dailypep_project_url') || '/functions/v1/send-reminders',
+    headers := jsonb_build_object(
+      'content-type', 'application/json',
+      'apikey', (select decrypted_secret from vault.decrypted_secrets where name = 'dailypep_automations_key')
+    ),
+    body := '{}'::jsonb
+  );
+  $$
+);

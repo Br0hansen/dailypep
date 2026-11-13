@@ -16,9 +16,13 @@ Cloud support in this first version is **explicit backup and restore**, not auto
 
 The initial cloud save passes revision `0`, which creates a backup only if none exists. An existing backup must be fetched before it can be replaced. Later saves pass the last reviewed revision; the database rejects the write if another device has saved a newer revision. Fetch and review that backup before choosing which copy to retain. The app never assumes that the most recent login has the newest data.
 
+## Push reminders
+
+Push reminders use separate, timing-only tables and do not depend on the manual backup being current. Follow [PUSH_SETUP.md](PUSH_SETUP.md) to apply the migration, configure VAPID secrets, deploy the two Edge Functions and create the Supabase Cron job.
+
 ## Boundaries
 
-- No push notification scheduler, Apple widgets, HealthKit integration, or SwiftData import is included in the web storage layer.
+- The push scheduler is an optional Supabase deployment. Apple widgets, HealthKit integration and SwiftData import are not included in the web storage layer.
 - JSON imports validate types, dates, numeric values, record references, duplicate logs and schema version before saving anything.
 - The web JSON format is versioned and separate from the native app's SwiftData database.
 - Browser storage is a cache, not a guaranteed backup. Use JSON export or cloud backup for recovery. Clearing site data removes the local cache and session.

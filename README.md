@@ -52,16 +52,18 @@ protects against silently replacing a newer cloud backup from another device.
 Authentication and Supabase API responses are never cached by the service
 worker; only the static application shell is cached.
 
-## PWA updates and limits
+## PWA updates and push reminders
 
 A new app version waits until the user chooses to reload. Finish or save open
 forms before applying an update. The shell listens to `dailypep:update-ready`
 and can invoke `event.detail.update()` after the user accepts.
 
-Native iOS widgets, biometric app locking and scheduled background injection
-notifications are not provided by this web version. Push delivery needs a
-separate server-backed implementation and browser permission. This app does
-not pretend that keeping a browser tab open is a reliable reminder system.
+Standards-based Web Push is implemented through Supabase Cron and Edge
+Functions. It requires the one-time hosted setup in [PUSH_SETUP.md](PUSH_SETUP.md),
+a signed-in account and explicit browser permission. On iPhone/iPad the PWA
+must be added to the Home Screen first. Notifications are generic and do not
+put peptide names or doses on the lock screen. Native iOS widgets and biometric
+app locking are not provided by this web version.
 
 The SwiftData database is not imported automatically. Existing native records
 need an explicit export/migration path before the iOS app is retired.
@@ -95,5 +97,5 @@ commands above; run `npm install` first.
 - Native Swift checks were attempted but blocked by sandbox/CoreSimulator
   access. Native source files were not changed in this migration.
 
-The first web version does not automatically import native SwiftData records,
-provide push reminders/widgets, or continuously synchronize between devices.
+The web version does not automatically import native SwiftData records,
+provide native widgets, or continuously synchronize workspaces between devices.
