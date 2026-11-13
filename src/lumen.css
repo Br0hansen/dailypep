@@ -1,4 +1,4 @@
-/* Lumen — quiet, warm, phone-first layer. Sits on top of the existing rules. */
+/* Clear — cool neutrals and one confident accent. Sits on top of the existing rules. */
 
 :root {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -6,98 +6,89 @@
 }
 
 :root[data-appearance="light"] {
-  --bg: #f4f1ea;
-  --surface: #fffcf8;
-  --surface-high: #fffdfb;
-  --ink: #1c1915;
-  --muted: #6f675e;
-  --line: #e5ddd2;
-  --accent: #0e7a5f;
-  --accent-soft: #0e7a5f16;
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface-high: #ffffff;
+  --ink: #1c1c1e;
+  --muted: #636366;
+  --line: #d8d8de;
+  --accent: #0056d6;
+  --accent-soft: #0056d614;
   --accent-ink: #ffffff;
-  --danger: #b42318;
-  --warning: #8a5a10;
+  --danger: #d70015;
+  --warning: #9a6700;
   color-scheme: light;
   background: var(--bg);
   color: var(--ink);
 }
 
 :root[data-appearance="light"][data-theme="corall"] {
-  --accent: #a33d4a;
-  --accent-soft: #a33d4a14;
+  --accent: #be2e45;
+  --accent-soft: #be2e4514;
   --accent-ink: #ffffff;
 }
 
 :root[data-appearance="dark"] {
-  --bg: #121613;
-  --surface: #1c221e;
-  --surface-high: #242b26;
-  --ink: #f4f1ea;
-  --muted: #a8a094;
-  --line: #313a34;
-  --accent: #8ee0c4;
-  --accent-soft: #8ee0c41f;
-  --accent-ink: #10241c;
-  --danger: #ffb4ab;
-  --warning: #e6c597;
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-high: #2c2c2e;
+  --ink: #f2f2f7;
+  --muted: #98989d;
+  --line: #38383a;
+  --accent: #7aa7ff;
+  --accent-soft: #7aa7ff24;
+  --accent-ink: #06142e;
+  --danger: #ff6961;
+  --warning: #e6b450;
   color-scheme: dark;
   background: var(--bg);
   color: var(--ink);
 }
 
 :root[data-appearance="dark"][data-theme="corall"] {
-  --bg: #161311;
-  --surface: #241f1c;
-  --surface-high: #2e2824;
-  --line: #3d3530;
-  --accent: #f3a8ae;
-  --accent-soft: #f3a8ae1f;
-  --accent-ink: #3d1518;
-  background: var(--bg);
+  --accent: #ff9aab;
+  --accent-soft: #ff9aab24;
+  --accent-ink: #3d1218;
 }
 
 :root[data-appearance="light"] .lumen {
-  --bg: #f4f1ea;
-  --surface: #fffcf8;
-  --surface-high: #fffdfb;
-  --ink: #1c1915;
-  --muted: #6f675e;
-  --line: #e5ddd2;
-  --accent: #0e7a5f;
-  --accent-soft: #0e7a5f16;
+  --bg: #f2f2f7;
+  --surface: #ffffff;
+  --surface-high: #ffffff;
+  --ink: #1c1c1e;
+  --muted: #636366;
+  --line: #d8d8de;
+  --accent: #0056d6;
+  --accent-soft: #0056d614;
   --accent-ink: #ffffff;
-  --danger: #b42318;
-  --warning: #8a5a10;
+  --danger: #d70015;
+  --warning: #9a6700;
 }
 
 :root[data-appearance="light"][data-theme="corall"] .lumen {
-  --accent: #a33d4a;
-  --accent-soft: #a33d4a14;
+  --accent: #be2e45;
+  --accent-soft: #be2e4514;
   --accent-ink: #ffffff;
 }
 
 :root[data-appearance="dark"] .lumen {
-  --bg: #121613;
-  --surface: #1c221e;
-  --surface-high: #242b26;
-  --ink: #f4f1ea;
-  --muted: #a8a094;
-  --line: #313a34;
-  --accent: #8ee0c4;
-  --accent-soft: #8ee0c41f;
-  --accent-ink: #10241c;
-  --danger: #ffb4ab;
-  --warning: #e6c597;
+  --bg: #000000;
+  --surface: #1c1c1e;
+  --surface-high: #2c2c2e;
+  --ink: #f2f2f7;
+  --muted: #98989d;
+  --line: #38383a;
+  --accent: #7aa7ff;
+  --accent-soft: #7aa7ff24;
+  --accent-ink: #06142e;
+  --danger: #ff6961;
+  --warning: #e6b450;
 }
 
 :root[data-appearance="dark"][data-theme="corall"] .lumen {
-  --bg: #161311;
-  --surface: #241f1c;
-  --surface-high: #2e2824;
-  --line: #3d3530;
-  --accent: #f3a8ae;
-  --accent-soft: #f3a8ae1f;
-  --accent-ink: #3d1518;
+  --accent: #ff9aab;
+  --accent-soft: #ff9aab24;
+  --accent-ink: #3d1218;
 }
 
 ::selection { background: var(--accent-soft); color: var(--ink); }
@@ -623,8 +614,8 @@
   background: var(--accent-soft);
 }
 .accent-dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-.accent-dot.sea { background: #0e7a5f; }
-.accent-dot.coral { background: #c24b57; }
+.accent-dot.blue { background: #0056d6; }
+.accent-dot.rose { background: #be2e45; }
 :root[data-appearance] .lumen .tool-link {
   width: 100%;
   justify-content: flex-start;
